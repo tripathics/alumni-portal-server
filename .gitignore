@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+
+# env var
+.env
+.env.*
+!.env.example
+!.env.defaults
+
+# Editor specific
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+*.sw?
+*.cache
+.DS_Store
+
+# logs
+/logs
+*.log
