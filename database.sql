@@ -81,13 +81,16 @@ CREATE TABLE membership_applications (
 CREATE TABLE otp_email (
     email varchar(50) PRIMARY KEY NOT NULL,
     otp varchar(6) NOT NULL,
-    status BOOLEAN,
-    created_at TIMESTAMP DEFAULT NOW()
+    verified BOOLEAN,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE otp_email_attempts (
     email varchar(50) PRIMARY KEY NOT NULL,
-    attempts INTEGER DEFAULT 0
+    attempts INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE organisationDetails 

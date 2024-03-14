@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/user.model.js';
 import Profile from '../models/profile.model.js';
+import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 
 export const register = async (req, res, next) => {
@@ -12,6 +13,17 @@ export const register = async (req, res, next) => {
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // check if email is otp verified before signup
+    const otpRecord = await OTP.findOTPByEmail(email);
+    if (!otpRecord || !otpRecord.verified) {
+      return res.status(400).json({ message: 'Email not verified' });
+    }
+    // check if otp verified is expired
+    if (new Date() - new Date(otpRecord.updated_at) > 5 * 60 * 1000) {
+      OTP.deleteOTP(email, true); // delete expired verified otp
+      return res.status(400).json({ message: 'Session expired, please retry the signup process' });
     }
 
     // hash password and create user
