@@ -59,6 +59,41 @@ export const login = async (req, res, next) => {
   }
 };
 
+export const logout = async (req, res) => {
+  res.clearCookie('auth').json({ message: 'User logged out', success: true });
+};
+
+export const readProfile = async (req, res, next) => {
+  try {
+    const { email } = req.user;
+    const profileRecord = await Profile.findByEmail(email);
+    if (!profileRecord) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+    res.status(200).json(profileRecord);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { id: userId, email } = req.user;
+    const profileData = req.body;
+
+    // find user profile and only update if profile is not locked
+    const userProfile = await Profile.findByEmail(email);
+    if (userProfile?.profile_locked) {
+      return res.status(400).json({ message: 'Profile is locked' });
+    }
+
+    const updatedProfile = await Profile.createOrUpdate(userId, profileData);
+    res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUsers = async (req, res, next) => {
   try {
     const users = await User.find();

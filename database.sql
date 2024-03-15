@@ -43,8 +43,8 @@ CREATE TABLE profiles (
 );
 
 -- create table for storing academics details of users, having foreign key as userId from profile table
-CREATE TABLE academics (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+CREATE TABLE educations (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
     type text DEFAULT 'full-time' CHECK(type = ANY(ARRAY['part-time', 'full-time'])),
     institute varchar(255) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE academics (
 
 -- create table for storing experience (job and internship) details of users having foreign key as userId from profile table
 CREATE TABLE experiences (
-    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
     type text DEFAULT 'job' CHECK(type = ANY(ARRAY['job', 'internship'])),
     organisation varchar(255) NOT NULL,
