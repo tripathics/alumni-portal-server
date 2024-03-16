@@ -29,7 +29,7 @@ const profileColumns = [
 class Profile {
   static async findByEmail(email) {
     const result = await db.query(`
-      SELECT users.id, users.email, users.role, profiles.title, profiles.firstName, profiles.lastName, profiles.avatar,
+      SELECT users.id, users.email, users.role, profiles.title, profiles.firstName, profiles.lastName, profiles.avatar, profiles.sign,
       membership_applications.status = 'pending' as "profile_locked"
       FROM users
       LEFT JOIN profiles ON users.id = profiles."userId"
@@ -52,6 +52,17 @@ class Profile {
       RETURNING *
     `;
     const result = await db.query(sql, values);
+    return result.rows[0];
+  }
+
+  static async updateAvatar(userId, avatar) {
+    const result = await db.query(`
+      UPDATE profiles
+      SET avatar = $1
+      WHERE "userId" = $2
+      RETURNING *
+    `, [avatar, userId]);
+
     return result.rows[0];
   }
 }

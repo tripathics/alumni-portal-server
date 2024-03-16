@@ -94,6 +94,18 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+export const updateAvatar = async (req, res, next) => {
+  try {
+    const { id: userId } = req.user;
+    const avatar = req.file.filename;
+
+    const result = await Profile.updateAvatar(userId, avatar);
+    res.status(200).json({ success: true, result, message: 'Avatar updated' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUsers = async (req, res, next) => {
   try {
     const users = await User.find();
