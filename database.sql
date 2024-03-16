@@ -30,8 +30,8 @@ CREATE TABLE profiles (
     country  varchar(64) NOT NULL,
 
     phone varchar(15), 
-    altPhone varchar(15),
-    altEmail varchar(255),
+    alt_phone varchar(15),
+    alt_email varchar(255),
     linkedin varchar(50),
     github varchar(50),
 
@@ -64,7 +64,7 @@ CREATE TABLE experiences (
     designation varchar(255) NOT NULL,
     location varchar(255) NOT NULL,
     start_date date NOT NULL,
-    end_date date DEFAULT 'present',
+    end_date date DEFAULT NULL,
     ctc decimal(10,2),
     description varchar(255) NOT NULL
 );

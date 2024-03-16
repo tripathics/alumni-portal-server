@@ -41,6 +41,12 @@ const verify = async (req, res, next) => {
     const result = await verifyOTP(email, otp);
     res.status(200).json(result);
   } catch (err) {
+    if (err.message.startsWith('OTP:')) {
+      return res.status(400).json({
+        success: false,
+        message: err.message,
+      });
+    }
     next(err);
   }
 };

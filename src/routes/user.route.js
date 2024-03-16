@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.middleware.js';
 import {
-  login, register, readProfile, updateProfile, logout, updateAvatar,
+  login, register, readProfile, updateProfile, logout, updateAvatar, checkEmailExists,
 } from '../controllers/user.controller.js';
+import { generate } from '../controllers/otp.controller.js';
 import { updateAvatarFile } from '../middlewares/media.middleware.js';
 
 const router = Router();
 
+router.post('/register-otp-gen', checkEmailExists, generate);
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);

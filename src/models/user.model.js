@@ -16,6 +16,19 @@ class User {
     return result.rows[0];
   }
 
+  static async findByEmailWithProfile(email) {
+    const result = await db.query(`
+      SELECT users.*, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
+      membership_applications.status = 'pending' as "profile_locked"
+      FROM users
+      LEFT JOIN profiles ON users.id = profiles.user_id
+      LEFT JOIN membership_applications ON users.id = membership_applications.user_id 
+      WHERE users.email = $1
+    `, [email]);
+
+    return result.rows[0];
+  }
+
   static async create({ email, password, role = 'user' }) {
     const result = await db.query(`
       INSERT INTO users (email, password, role) 

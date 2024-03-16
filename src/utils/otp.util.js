@@ -177,11 +177,14 @@ export const verifyOTP = async (email, otp) => {
       return { success: true };
     }
     // increment the number of attempts
-    const { attempts } = OTP.incrementAttempts(email);
-    return { success: false, attempts };
+    const { attempts } = await OTP.incrementAttempts(email);
+    if (attempts >= MAX_ATTEMPTS) {
+      throw new Error('OTP: Max limit reached for today. Please try after 24 hours.');
+    }
+    throw new Error(`OTP: Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts}`);
   } catch (err) {
-    if (err.message === 'OTP: OTP Expired') {
-      return { success: false, expired: true };
+    if (err.message.startsWith('OTP:')) {
+      throw new Error(err.message);
     }
     logger.error(err.message);
   }

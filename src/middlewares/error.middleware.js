@@ -1,6 +1,12 @@
 import logger from '../config/logger.config.js';
 
-const errorHandler = (err, req, res) => {
+export const notFoundErrorHandler = (req, res) => {
+  res.status(404).json({
+    message: `Not Found - ${req.originalUrl}`,
+  });
+};
+
+export const errorHandler = (err, req, res) => {
   const statusCode = err.statusCode || 500;
 
   logger.error(err.message);
@@ -10,5 +16,3 @@ const errorHandler = (err, req, res) => {
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 };
-
-export default errorHandler;

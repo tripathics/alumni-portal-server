@@ -29,11 +29,12 @@ const profileColumns = [
 class Profile {
   static async findByEmail(email) {
     const result = await db.query(`
-      SELECT users.id, users.email, users.role, profiles.title, profiles.firstName, profiles.lastName, profiles.avatar, profiles.sign,
+      SELECT users.id, users.email, users.role, 
+      profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
       membership_applications.status = 'pending' as "profile_locked"
-      FROM users
-      LEFT JOIN profiles ON users.id = profiles."userId"
-      LEFT JOIN membership_applications ON users.id = membership_applications."userId" 
+      FROM profiles
+      RIGHT JOIN users ON users.id = profiles.user_id
+      LEFT JOIN membership_applications ON users.id = membership_applications.user_id
       WHERE users.email = $1
     `, [email]);
 
@@ -45,9 +46,9 @@ class Profile {
     const values = [userId, ...columns.map((column) => profileData[column])];
 
     const sql = `
-      INSERT INTO profiles ("userId", ${columns.join(', ')})
+      INSERT INTO profiles ("user_id", ${columns.join(', ')})
       VALUES ($1, ${columns.map((_, i) => `$${i + 2}`).join(', ')})
-      ON CONFLICT ("userId") DO UPDATE SET
+      ON CONFLICT ("user_id") DO UPDATE SET
       ${columns.map((column) => `${column} = EXCLUDED.${column}`).join(', ')}
       RETURNING *
     `;

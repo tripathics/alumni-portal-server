@@ -4,6 +4,19 @@ import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 
+export const checkEmailExists = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const register = async (req, res, next) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -39,20 +52,20 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const userProfile = await Profile.findByEmail(email);
-    if (!userProfile) {
+    const userProfileRecord = await User.findByEmailWithProfile(email);
+    if (!userProfileRecord) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, userProfile.password);
+    const isPasswordValid = await bcrypt.compare(password, userProfileRecord.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-    delete userProfile.password;
-    const secretToken = generateToken(userProfile);
+    delete userProfileRecord.password;
+    const secretToken = generateToken(userProfileRecord);
 
     res.cookie('auth', secretToken, { maxAge: 60 * 60 * 1000, httpOnly: true }).json({
-      message: 'User logged in', user: userProfile, success: true,
+      message: 'User logged in', user: userProfileRecord, success: true,
     });
   } catch (error) {
     next(error);
