@@ -178,10 +178,10 @@ export const verifyOTP = async (email, otp) => {
     }
     // increment the number of attempts
     const { attempts } = await OTP.incrementAttempts(email);
-    if (attempts >= MAX_ATTEMPTS) {
+    if (attempts > MAX_ATTEMPTS) {
       throw new Error('OTP: Max limit reached for today. Please try after 24 hours.');
     }
-    throw new Error(`OTP: Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts}`);
+    throw new Error(`OTP: Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
   } catch (err) {
     if (err.message.startsWith('OTP:')) {
       throw new Error(err.message);
