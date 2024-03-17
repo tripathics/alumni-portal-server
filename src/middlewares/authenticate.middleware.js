@@ -4,6 +4,9 @@ import logger from '../config/logger.config.js';
 
 const authenticate = async (req, res, next) => {
   const token = req.cookies.auth;
+  if (!token) {
+    return res.status(401).json({ message: 'Token not found' });
+  }
 
   try {
     const payload = verifyToken(token);

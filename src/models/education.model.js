@@ -1,4 +1,5 @@
 import db from '../config/db.config.js';
+import ApiError from '../utils/ApiError.util.js';
 
 const educationColumns = [
   'id',
@@ -14,13 +15,13 @@ const educationColumns = [
 
 class Educations {
   static async createOrUpdate(userId, educationData) {
-    const columns = educationColumns.filter((column) => !!educationData[column]);
+    const columns = educationColumns.filter((column) => !!educationData[column] && column !== 'user_id');
     const values = [userId, ...columns.map((column) => educationData[column])];
 
     // only allow NIT Arunachal Pradesh education as first insert for a user
     const existingEducation = await this.findByUserId(userId);
-    if (!educationData.id && !existingEducation.length && educationData.institute !== 'NIT Arunachal Pradesh') {
-      throw new Error('First education should be of NIT Arunachal Pradesh');
+    if (!educationData.id && !existingEducation.length && educationData.institute !== 'National Institute of Technology, Arunachal Pradesh') {
+      throw new ApiError(400, 'Education', 'First education should be of National Institute of Technology, Arunachal Pradesh');
     }
 
     const sql = `
@@ -37,6 +38,11 @@ class Educations {
   static async findByUserId(userId) {
     const result = await db.query('SELECT * FROM educations WHERE user_id = $1', [userId]);
     return result.rows;
+  }
+
+  static async findById(id) {
+    const result = await db.query('SELECT * FROM educations WHERE id = $1', [id]);
+    return result.rows[0];
   }
 
   static async delete(id) {

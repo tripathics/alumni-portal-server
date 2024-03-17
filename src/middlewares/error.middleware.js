@@ -2,7 +2,7 @@ import logger from '../config/logger.config.js';
 
 export const notFoundErrorHandler = (req, res) => {
   res.status(404).json({
-    message: `Not Found - ${req.originalUrl}`,
+    message: `Not Found - ${req.method} ${req.originalUrl}`,
   });
 };
 

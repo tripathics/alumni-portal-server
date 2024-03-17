@@ -4,6 +4,7 @@ import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
+import deleteFile from '../utils/media.util.js';
 
 export const checkEmailExists = async (req, res, next) => {
   try {
@@ -73,6 +74,21 @@ export const login = async (req, res, next) => {
   }
 };
 
+export const readUser = async (req, res, next) => {
+  try {
+    const { email } = req.user;
+    const userProfileRecord = await User.findByEmailWithProfile(email);
+    if (!userProfileRecord) {
+      throw new ApiError(404, 'User', 'User not found');
+    }
+
+    delete userProfileRecord.password;
+    res.status(200).json({ user: userProfileRecord, message: 'User found', success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const logout = async (req, res) => {
   res.clearCookie('auth').json({ message: 'User logged out', success: true });
 };
@@ -84,7 +100,7 @@ export const readProfile = async (req, res, next) => {
     if (!profileRecord) {
       return res.status(404).json({ message: 'Profile not found' });
     }
-    res.status(200).json(profileRecord);
+    res.status(200).json({ user: profileRecord, message: 'Profile found', success: true });
   } catch (error) {
     next(error);
   }
@@ -110,8 +126,14 @@ export const updateProfile = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
-    const { id: userId } = req.user;
-    const avatar = req.file.filename;
+    const { id: userId, email } = req.user;
+    const avatar = req.file?.filename;
+
+    // delete old avatar
+    const userProfile = await Profile.findByEmail(email);
+    if (userProfile.avatar) {
+      deleteFile(userProfile.avatar, 'avatar');
+    }
 
     const result = await Profile.updateAvatar(userId, avatar);
     res.status(200).json({ success: true, result, message: 'Avatar updated' });

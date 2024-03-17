@@ -20,7 +20,7 @@ CREATE TABLE profiles (
     last_name varchar(64),
     dob date NOT NULL,
     sex text NOT NULL CHECK(sex = ANY(ARRAY['male', 'female', 'others'])),
-    category text NOT NULL CHECK(category = ANY(ARRAY['gen', 'obc', 'sc', 'st', 'others'])),
+    category text NOT NULL CHECK(category = ANY(ARRAY['gen', 'obc', 'sc', 'st', 'ews', 'others'])),
     nationality varchar(15) NOT NULL,
     religion varchar(16),
     address varchar(128) NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE educations (
     discipline varchar(50) NOT NULL,    -- field of study
     start_date date NOT NULL,
     end_date date NOT NULL,       -- or expected
-    description varchar(255) NOT NULL
+    description varchar(255) DEFAULT NULL
 );
 
 -- create table for storing experience (job and internship) details of users having foreign key as userId from profile table
@@ -66,7 +66,7 @@ CREATE TABLE experiences (
     start_date date NOT NULL,
     end_date date DEFAULT NULL,
     ctc decimal(10,2),
-    description varchar(255) NOT NULL
+    description varchar(255) DEFAULT NULL
 );
 
 CREATE TABLE membership_applications (

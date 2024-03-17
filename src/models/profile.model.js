@@ -29,8 +29,8 @@ const profileColumns = [
 class Profile {
   static async findByEmail(email) {
     const result = await db.query(`
-      SELECT users.id, users.email, users.role, 
-      profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
+      SELECT users.email, users.role, 
+      profiles.*,
       membership_applications.status = 'pending' as "profile_locked"
       FROM profiles
       RIGHT JOIN users ON users.id = profiles.user_id
@@ -42,7 +42,7 @@ class Profile {
   }
 
   static async createOrUpdate(userId, profileData) {
-    const columns = profileColumns.filter((column) => !!profileData[column]);
+    const columns = profileColumns.filter((column) => !!profileData[column] && column !== 'user_id');
     const values = [userId, ...columns.map((column) => profileData[column])];
 
     const sql = `
@@ -60,7 +60,7 @@ class Profile {
     const result = await db.query(`
       UPDATE profiles
       SET avatar = $1
-      WHERE "userId" = $2
+      WHERE "user_id" = $2
       RETURNING *
     `, [avatar, userId]);
 
