@@ -3,13 +3,14 @@ import User from '../models/user.model.js';
 import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
+import ApiError from '../utils/ApiError.util.js';
 
 export const checkEmailExists = async (req, res, next) => {
   try {
     const { email } = req.body;
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      throw new ApiError(400, 'User', 'User already exists');
     }
     next();
   } catch (error) {
@@ -54,7 +55,7 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const userProfileRecord = await User.findByEmailWithProfile(email);
     if (!userProfileRecord) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      throw new ApiError(401, 'User', 'User does not exist with this email. Please register first.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, userProfileRecord.password);

@@ -46,9 +46,9 @@ class Profile {
     const values = [userId, ...columns.map((column) => profileData[column])];
 
     const sql = `
-      INSERT INTO profiles ("user_id", ${columns.join(', ')})
+      INSERT INTO profiles (user_id, ${columns.join(', ')})
       VALUES ($1, ${columns.map((_, i) => `$${i + 2}`).join(', ')})
-      ON CONFLICT ("user_id") DO UPDATE SET
+      ON CONFLICT (user_id) DO UPDATE SET
       ${columns.map((column) => `${column} = EXCLUDED.${column}`).join(', ')}
       RETURNING *
     `;

@@ -5,8 +5,8 @@ import mediaRoute from './media.route..js';
 
 const router = Router();
 
+router.use('/media', mediaRoute);
 router.use('/api/users', userRoute);
 router.use('/api/otp', otpRoute);
-router.use('/media', mediaRoute);
 
 export default router;

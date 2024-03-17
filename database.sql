@@ -20,7 +20,7 @@ CREATE TABLE profiles (
     last_name varchar(64),
     dob date NOT NULL,
     sex text NOT NULL CHECK(sex = ANY(ARRAY['male', 'female', 'others'])),
-    category text NOT NULL CHECK(category = ANY(ARRAY['general', 'obc', 'sc', 'st', 'others'])),
+    category text NOT NULL CHECK(category = ANY(ARRAY['gen', 'obc', 'sc', 'st', 'others'])),
     nationality varchar(15) NOT NULL,
     religion varchar(16),
     address varchar(128) NOT NULL,

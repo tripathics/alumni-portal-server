@@ -1,6 +1,7 @@
 import OTP from '../models/otp.model.js';
 import transporter from '../config/nodemailer.config.js';
 import logger from '../config/logger.config.js';
+import ApiError from './ApiError.util.js';
 
 const MAX_ATTEMPTS = 5;
 
@@ -122,7 +123,7 @@ NIT Arunachal Pradesh
   transporter.sendMail(mailOptions, (err, info) => {
     if (err) {
       logger.error(`Error sending OTP email to ${email}: ${err.message}`);
-      throw new Error('Error sending OTP email');
+      throw new ApiError(500, 'OTP', 'Error sending OTP email');
     }
     logger.log(`OTP ${otp} sent to ${email}: ${info}`);
   });
@@ -134,10 +135,10 @@ export const generateOTP = async (email) => {
   try {
     // check if attempts less than 3 and last attempt is more than 24 hours ago
     const attempt = await OTP.findAttemptByEmail(email);
-    if (attempt && attempt.attempts >= MAX_ATTEMPTS) {
+    if (attempt && attempt.attempts > MAX_ATTEMPTS) {
       // if last attempt is less than 24 hours ago
       if (new Date() - new Date(attempt.updated_at) < 24 * 60 * 60 * 1000) {
-        throw new Error('OTP: Max limit reached');
+        throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
       }
       // reset the attempts to 0
       await OTP.resetAttempts(email);
@@ -147,11 +148,10 @@ export const generateOTP = async (email) => {
     await OTP.createOTP({ email, otp });
     return { email, otp };
   } catch (err) {
-    if (err.message === 'OTP: Max limit reached') {
+    if (err instanceof ApiError) {
       throw err;
     }
-    logger.error(`DATABASE: ${err.message}`);
-    throw new Error('Error generating OTP');
+    logger.error(err.message);
   }
 };
 
@@ -169,7 +169,7 @@ export const verifyOTP = async (email, otp) => {
         if (!otpDeleteResult) {
           logger.error('OTP: Error deleting expired OTP');
         }
-        throw new Error('OTP: OTP Expired');
+        throw new ApiError(400, 'OTP', 'OTP Expired');
       }
       // OTP is correct so mark the OTP verified and reset attempts to 0
       OTP.markVerified(email);
@@ -179,9 +179,9 @@ export const verifyOTP = async (email, otp) => {
     // increment the number of attempts
     const { attempts } = await OTP.incrementAttempts(email);
     if (attempts > MAX_ATTEMPTS) {
-      throw new Error('OTP: Max limit reached for today. Please try after 24 hours.');
+      throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
     }
-    throw new Error(`OTP: Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
+    throw new ApiError(400, 'OTP', `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
   } catch (err) {
     if (err.message.startsWith('OTP:')) {
       throw new Error(err.message);
