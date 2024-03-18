@@ -70,10 +70,11 @@ CREATE TABLE experiences (
 );
 
 CREATE TABLE membership_applications (
-    user_id uuid REFERENCES profiles(user_id) PRIMARY KEY,
+    user_id uuid REFERENCES profiles(user_id) PRIMARY KEY NOT NULL,
     membership_level text NOT NULL CHECK(membership_level = ANY(ARRAY['level1_networking', 'level2_volunteering'])),
     sign VARCHAR(255) NOT NULL,
-    submit_date TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
 
     status text DEFAULT 'pending' CHECK(status = ANY(ARRAY['pending', 'approved', 'rejected']))
 );

@@ -41,6 +41,17 @@ class Profile {
     return result.rows[0];
   }
 
+  static async findProfileWithEducationAtNITAP(email) {
+    const result = await db.query(`
+    SELECT users.email, profiles.*, educations.degree, educations.discipline, educations.start_date as enrollment_date, educations.end_date as graduation_date
+    FROM profiles LEFT JOIN educations ON profiles.user_id = educations.user_id
+    LEFT JOIN users ON users.id = profiles.user_id
+    WHERE users.email = $1 AND educations.institute = $2
+    `, [email, 'National Institute of Technology, Arunachal Pradesh']);
+
+    return result.rows[0];
+  }
+
   static async createOrUpdate(userId, profileData) {
     const columns = profileColumns.filter((column) => !!profileData[column] && column !== 'user_id');
     const values = [userId, ...columns.map((column) => profileData[column])];
