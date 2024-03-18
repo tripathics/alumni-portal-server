@@ -12,7 +12,7 @@ const authenticate = async (req, res, next) => {
     const payload = verifyToken(token);
     const user = await User.findById(payload.id);
     if (!user) {
-      throw new Error('Invalid JWT');
+      return res.status(401).json({ message: 'Invalid token' });
     }
     req.user = user;
     next();

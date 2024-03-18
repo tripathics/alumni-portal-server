@@ -1,19 +1,12 @@
--- created the database 
-DROP DATABASE IF EXISTS alumnidatabase;
-CREATE DATABASE alumnidatabase;
 
--- connect to the database 
-\c alumnidatabase;
-
--- add createdAt and updatedAt columns in every table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     email varchar(50) NOT NULL UNIQUE,
     password varchar(100) NOT NULL,
     role text[] NOT NULL CHECK(role <@ ARRAY['admin', 'user', 'alumni']) DEFAULT ARRAY['user']
 );
 
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     user_id uuid REFERENCES users(id) PRIMARY KEY,    
     title text NOT NULL CHECK(title = ANY(ARRAY['mr', 'mrs', 'ms', 'dr'])),
     first_name varchar(64) NOT NULL,
@@ -42,8 +35,7 @@ CREATE TABLE profiles (
     avatar varchar(255) DEFAULT NULL
 );
 
--- create table for storing academics details of users, having foreign key as userId from profile table
-CREATE TABLE educations (
+CREATE TABLE IF NOT EXISTS educations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
     type text DEFAULT 'full-time' CHECK(type = ANY(ARRAY['part-time', 'full-time'])),
@@ -55,8 +47,7 @@ CREATE TABLE educations (
     description varchar(255) DEFAULT NULL
 );
 
--- create table for storing experience (job and internship) details of users having foreign key as userId from profile table
-CREATE TABLE experiences (
+CREATE TABLE IF NOT EXISTS experiences (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
     type text DEFAULT 'job' CHECK(type = ANY(ARRAY['job', 'internship'])),
@@ -69,7 +60,7 @@ CREATE TABLE experiences (
     description varchar(255) DEFAULT NULL
 );
 
-CREATE TABLE membership_applications (
+CREATE TABLE IF NOT EXISTS membership_applications (
     user_id uuid REFERENCES profiles(user_id) PRIMARY KEY NOT NULL,
     membership_level text NOT NULL CHECK(membership_level = ANY(ARRAY['level1_networking', 'level2_volunteering'])),
     sign VARCHAR(255) NOT NULL,
@@ -79,7 +70,7 @@ CREATE TABLE membership_applications (
     status text DEFAULT 'pending' CHECK(status = ANY(ARRAY['pending', 'approved', 'rejected']))
 );
 
-CREATE TABLE otp_email (
+CREATE TABLE IF NOT EXISTS otp_email (
     email varchar(50) PRIMARY KEY NOT NULL,
     otp varchar(6) NOT NULL,
     verified BOOLEAN,
@@ -87,14 +78,14 @@ CREATE TABLE otp_email (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE otp_email_attempts (
+CREATE TABLE IF NOT EXISTS otp_email_attempts (
     email varchar(50) PRIMARY KEY NOT NULL,
     attempts INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE organisationDetails 
+CREATE TABLE IF NOT EXISTS organisationDetails 
 (
     organisation  varchar(100) 
 );
