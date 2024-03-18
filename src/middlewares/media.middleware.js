@@ -1,12 +1,12 @@
 import multer from 'multer';
-import storage from '../config/storage.config.js';
+import storage, { MAX_AVATAR_SIZE, MAX_SIGN_SIZE } from '../config/storage.config.js';
 
 export const updateAvatarFile = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  limits: { fileSize: MAX_AVATAR_SIZE }, // 2MB
 }).single('avatar');
 
 export const updateSignFile = multer({
   storage,
-  limits: { fileSize: 200 * 1024 }, // 200KB
+  limits: { fileSize: MAX_SIGN_SIZE }, // 200KB
 }).single('sign');

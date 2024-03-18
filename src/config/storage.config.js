@@ -9,6 +9,8 @@ const DIRNAME = path.dirname(FILENAME);
 // Ensure the directories for avatars and signs exist
 export const AVATAR_DIR = path.join(DIRNAME, '../../media/avatars');
 export const SIGN_DIR = path.join(DIRNAME, '../../media/signs');
+export const MAX_AVATAR_SIZE = 1024 * 1024 * 2; // 2MB
+export const MAX_SIGN_SIZE = 1024 * 200; // 200kB
 
 if (!fs.existsSync(AVATAR_DIR)) {
   fs.mkdirSync(AVATAR_DIR, { recursive: true });
