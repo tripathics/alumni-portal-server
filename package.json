@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --fix",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "migrate": "node ./src/database/migrate.js"
   },
   "author": "Chandrashekhar Tripathi",
   "license": "ISC",
