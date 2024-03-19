@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import authenticate from '../middlewares/authenticate.middleware.js';
+import { authenticate } from '../middlewares/authenticate.middleware.js';
 import { getAvatar, getSign } from '../controllers/media.controller.js';
 
 const router = Router();

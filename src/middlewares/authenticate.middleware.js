@@ -2,7 +2,7 @@ import { verifyToken } from '../utils/jwt.util.js';
 import User from '../models/user.model.js';
 import logger from '../config/logger.config.js';
 
-const authenticate = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   const token = req.cookies.auth;
   if (!token) {
     return res.status(401).json({ message: 'Token not found' });
@@ -25,4 +25,11 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-export default authenticate;
+export const authenticateAdmin = async (req, res, next) => {
+  authenticate(req, res, () => {
+    if (!req.user.role.includes('admin')) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+    next();
+  });
+};

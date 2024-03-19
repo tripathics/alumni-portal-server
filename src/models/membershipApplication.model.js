@@ -1,7 +1,7 @@
 import db from '../config/db.config.js';
 
 class MembershipApplications {
-  static async get() {
+  static async findAll() {
     const sql = `SELECT membership_applications.*, 
     profiles.registration_no, profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
     educations.degree, educations.degree, educations.end_date as graduation_date, educations.start_date as enrollment_date, 
@@ -12,6 +12,23 @@ class MembershipApplications {
     `;
     const { rows } = await db.query(sql, ['National Institute of Technology, Arunachal Pradesh']);
     return rows;
+  }
+
+  static async getSignByUserId(userId) {
+    const { rows } = await db.query('SELECT sign FROM membership_applications WHERE user_id = $1', [userId]);
+    return rows[0]?.sign;
+  }
+
+  static async findByUserId(userId) {
+    const { rows } = await db.query(`
+    SELECT membership_applications.*,
+    profiles.registration_no, profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
+    educations.degree, educations.degree, educations.end_date as graduation_date, educations.start_date as enrollment_date, 
+    FROM membership_applications 
+    LEFT JOIN profiles ON membership_applications.user_id = profiles.user_id
+    LEFT JOIN educations ON membership_applications.user_id = educations.user_id
+    WHERE membership_applications.status = 'pending' AND membership_applications.user_id = $1`, [userId]);
+    return rows[0];
   }
 
   static async create(userId, data) {
