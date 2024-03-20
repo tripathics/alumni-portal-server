@@ -132,60 +132,52 @@ NIT Arunachal Pradesh
 export const generateOTP = async (email) => {
   const otp = Math.floor(Math.random() * 10e5).toString().padEnd(6, '0');
 
-  try {
-    // check if attempts less than 3 and last attempt is more than 24 hours ago
-    const attempt = await OTP.findAttemptByEmail(email);
-    if (attempt && attempt.attempts > MAX_ATTEMPTS) {
-      // if last attempt is less than 24 hours ago
-      if (new Date() - new Date(attempt.updated_at) < 24 * 60 * 60 * 1000) {
-        throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
-      }
-      // reset the attempts to 0
-      await OTP.resetAttempts(email);
+  // check if attempts less than 3 and last attempt is more than 24 hours ago
+  const attempt = await OTP.findAttemptByEmail(email);
+  if (attempt && attempt.attempts > MAX_ATTEMPTS) {
+    // Convert otpResult.updated_at to the server's timezone
+    const updatedAtLocal = new Date(attempt.updated_at);
+    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    // if last attempt is less than 24 hours ago
+    if (new Date() - updatedAtLocal < 24 * 60 * 60 * 1000) {
+      throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
     }
-
-    // store the otp in database
-    await OTP.createOTP({ email, otp });
-    return { email, otp };
-  } catch (err) {
-    if (err instanceof ApiError) {
-      throw err;
-    }
-    logger.error(err.message);
+    // reset the attempts to 0
+    await OTP.resetAttempts(email);
   }
+
+  // store the otp in database
+  await OTP.createOTP({ email, otp });
+  return { email, otp };
 };
 
 export const verifyOTP = async (email, otp) => {
-  try {
-    const otpResult = await OTP.findOTPByEmail(email);
-    if (!otpResult) {
-      throw new Error('OTP: Email not found');
-    }
-    // check if otp is matched
-    if (otpResult.otp === otp) {
-      // delete if otp expired
-      if (new Date() - new Date(otpResult.updated_at) > 5 * 60 * 1000) {
-        const otpDeleteResult = await OTP.deleteOTP(email);
-        if (!otpDeleteResult) {
-          logger.error('OTP: Error deleting expired OTP');
-        }
-        throw new ApiError(400, 'OTP', 'OTP Expired');
-      }
-      // OTP is correct so mark the OTP verified and reset attempts to 0
-      OTP.markVerified(email);
-      OTP.resetAttempts(email);
-      return { success: true };
-    }
-    // increment the number of attempts
-    const { attempts } = await OTP.incrementAttempts(email);
-    if (attempts > MAX_ATTEMPTS) {
-      throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
-    }
-    throw new ApiError(400, 'OTP', `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
-  } catch (err) {
-    if (err.message.startsWith('OTP:')) {
-      throw new Error(err.message);
-    }
-    logger.error(err.message);
+  const otpResult = await OTP.findOTPByEmail(email);
+  if (!otpResult) {
+    throw new Error('OTP: Email not found');
   }
+  // check if otp is matched
+  if (otpResult.otp === otp) {
+    // Convert otpResult.updated_at to the server's timezone
+    const updatedAtLocal = new Date(otpResult.updated_at);
+    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    // otp expired
+    if (new Date() - updatedAtLocal > 5 * 60 * 1000) {
+      // const otpDeleteResult = await OTP.deleteOTP(email);  // delete expired otp
+      // if (!otpDeleteResult) {
+      //   logger.error('OTP: Error deleting expired OTP');
+      // }
+      throw new ApiError(400, 'OTP', 'OTP Expired');
+    }
+    // OTP is correct so mark the OTP verified and reset attempts to 0
+    OTP.markVerified(email);
+    OTP.resetAttempts(email);
+    return { success: true };
+  }
+  // increment the number of attempts
+  const { attempts } = await OTP.incrementAttempts(email);
+  if (attempts > MAX_ATTEMPTS) {
+    throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
+  }
+  throw new ApiError(400, 'OTP', `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
 };

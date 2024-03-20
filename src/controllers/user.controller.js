@@ -36,8 +36,9 @@ export const register = async (req, res, next) => {
       return res.status(400).json({ message: 'Email not verified' });
     }
     // check if otp verified is expired
-    if (new Date() - new Date(otpRecord.updated_at) > 5 * 60 * 1000) {
-      OTP.deleteOTP(email, true); // delete expired verified otp
+    const updatedAtLocal = new Date(otpRecord.updated_at);
+    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    if (new Date() - updatedAtLocal > 5 * 60 * 1000) {
       return res.status(400).json({ message: 'Session expired, please retry the signup process' });
     }
 
