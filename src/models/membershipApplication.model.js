@@ -4,7 +4,7 @@ class MembershipApplications {
   static async findAll() {
     const sql = `SELECT membership_applications.*, 
     profiles.registration_no, profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
-    educations.degree, educations.degree, educations.end_date as graduation_date, educations.start_date as enrollment_date, 
+    educations.degree, educations.discipline, educations.end_date as graduation_date, educations.start_date as enrollment_date
     FROM membership_applications
     LEFT JOIN profiles ON membership_applications.user_id = profiles.user_id
     LEFT JOIN educations ON membership_applications.user_id = educations.user_id
@@ -23,7 +23,7 @@ class MembershipApplications {
     const { rows } = await db.query(`
     SELECT membership_applications.*,
     profiles.registration_no, profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
-    educations.degree, educations.degree, educations.end_date as graduation_date, educations.start_date as enrollment_date, 
+    educations.degree, educations.discipline, educations.end_date as graduation_date, educations.start_date as enrollment_date 
     FROM membership_applications 
     LEFT JOIN profiles ON membership_applications.user_id = profiles.user_id
     LEFT JOIN educations ON membership_applications.user_id = educations.user_id
