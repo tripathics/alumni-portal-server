@@ -24,7 +24,3 @@ app.listen(PORT, async () => {
     logger.error(`Database connection failed: ${err.message}`);
   }
 });
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});

@@ -67,7 +67,7 @@ export const login = async (req, res, next) => {
     delete userProfileRecord.password;
     const secretToken = generateToken(userProfileRecord);
 
-    res.cookie('auth', secretToken, { maxAge: 60 * 60 * 1000, httpOnly: true }).json({
+    res.cookie('auth', secretToken, { httpOnly: true }).json({
       message: 'User logged in', user: userProfileRecord, success: true,
     });
   } catch (error) {

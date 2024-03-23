@@ -9,7 +9,7 @@ export const getMembershipApplications = async (req, res, next) => {
   }
 };
 
-export const getMembershipApplicationById = async (req, res, next) => {
+export const getMembershipApplicationByUserId = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const membershipApplicationRecord = await MembershipApplications.findByUserId(userId);

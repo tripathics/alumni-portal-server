@@ -16,6 +16,11 @@ if (process.env.NODE_ENV === 'development') {
 app.use(cookieParser());
 app.use(express.json());
 app.use(routes);
+
+app.get('/', (req, res) => {
+  res.send('Hello World! Welcome to Alumni Portal NIT Arunachal Pradesh!');
+});
+
 app.use(notFoundErrorHandler);
 app.use(errorHandler);
 

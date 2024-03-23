@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { getMembershipApplicationById, getMembershipApplications } from '../controllers/admin.controller.js';
+import { getMembershipApplicationByUserId, getMembershipApplications } from '../controllers/admin.controller.js';
 
 const router = Router();
 
 router.get('/membership-applications', getMembershipApplications);
-router.get('/membership-application/:userId', getMembershipApplicationById);
+router.get('/membership-applications/:userId', getMembershipApplicationByUserId);
 
 export default router;
