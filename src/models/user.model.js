@@ -37,6 +37,13 @@ class User {
     return result.rows[0];
   }
 
+  static async updatePassword(email, password) {
+    const result = await db.query(`
+      UPDATE users SET password = $1 WHERE email = $2 RETURNING *
+    `, [password, email]);
+    return result.rows[0];
+  }
+
   static async updateRole(id, role) {
     const result = await db.query(`
       UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
