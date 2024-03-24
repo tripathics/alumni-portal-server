@@ -6,12 +6,25 @@ import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
 import deleteFile from '../utils/media.util.js';
 
-export const checkEmailExists = async (req, res, next) => {
+export const checkEmailNotExists = async (req, res, next) => {
   try {
     const { email } = req.body;
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
       throw new ApiError(400, 'User', 'User already exists');
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkEmailExists = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const existingUser = await User.findByEmail(email);
+    if (!existingUser) {
+      throw new ApiError(400, 'User', 'User does not exist');
     }
     next();
   } catch (error) {
@@ -47,6 +60,27 @@ export const register = async (req, res, next) => {
     const user = await User.create({ email, password: hashedPassword });
     delete user.password;
     res.status(201).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatePassword = async (req, res, next) => {
+  try {
+    const { email, password, confirmPassword } = req.body;
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+    const existingUser = await User.findByEmail(email);
+    if (!existingUser) {
+      return res.status(400).json({ message: 'User does not exist' });
+    }
+
+    // hash password and update user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.updatePassword(email, hashedPassword);
+    delete user.password;
+    res.status(200).json(user);
   } catch (error) {
     next(error);
   }
