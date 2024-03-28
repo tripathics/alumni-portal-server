@@ -23,13 +23,22 @@ export const getMembershipApplicationById = async (req, res, next) => {
 export const updateMembershipApplicationStatus = async (req, res, next) => {
   try {
     const { body: { status }, params: { id } } = req;
+
+    // if current status is !pending, return error
+    const existingMembershipApplicationRecord = await MembershipApplications.findById(id);
+    if (existingMembershipApplicationRecord.status !== 'pending') {
+      return res.status(400).json({ message: 'Cannot update status of resolved/rejected application' });
+    }
+
     const membershipApplicationRecord = await MembershipApplications.updateStatus(id, status);
     if (membershipApplicationRecord.status === 'approved') {
       // append 'alumni' role to user
       const userRecord = await User.addRole(membershipApplicationRecord.user_id, 'alumni');
       if (userRecord.role.includes('alumni')) {
-        res.status(201).json({ message: 'Membership application status updated successfully', membershipApplicationRecord, userRecord });
+        res.status(201).json({ message: 'Membership application status approved successfully', membershipApplicationRecord });
       }
+    } else {
+      res.status(201).json({ message: 'Membership application rejected successfully', membershipApplicationRecord });
     }
   } catch (err) {
     next(err);
