@@ -142,15 +142,12 @@ export const readProfile = async (req, res, next) => {
 };
 
 export const updateProfile = async (req, res, next) => {
+  if (req.user.profile_locked) {
+    return res.status(400).json({ message: 'Profile is locked' });
+  }
   try {
-    const { id: userId, email } = req.user;
+    const { id: userId } = req.user;
     const profileData = req.body;
-
-    // find user profile and only update if profile is not locked
-    const userProfile = await Profile.findByEmail(email);
-    if (userProfile?.profile_locked) {
-      return res.status(400).json({ message: 'Profile is locked' });
-    }
 
     const updatedProfile = await Profile.createOrUpdate(userId, profileData);
     res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });

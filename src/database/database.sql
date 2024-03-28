@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     email varchar(50) NOT NULL UNIQUE,
@@ -8,12 +7,12 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS profiles (
     user_id uuid REFERENCES users(id) PRIMARY KEY,    
-    title text NOT NULL CHECK(title = ANY(ARRAY['mr', 'mrs', 'ms', 'dr'])),
+    title text NOT NULL CHECK(title = ANY(ARRAY['Mr','Mrs','Ms','Dr'])),
     first_name varchar(64) NOT NULL,
     last_name varchar(64),
     dob date NOT NULL,
-    sex text NOT NULL CHECK(sex = ANY(ARRAY['male', 'female', 'others'])),
-    category text NOT NULL CHECK(category = ANY(ARRAY['gen', 'obc', 'sc', 'st', 'ews', 'others'])),
+    sex text NOT NULL CHECK(sex = ANY(ARRAY['Male', 'Female', 'Others'])),
+    category text NOT NULL CHECK(category = ANY(ARRAY['General', 'OBC', 'SC', 'ST', 'EWS'])),
     nationality varchar(15) NOT NULL,
     religion varchar(16),
     address varchar(128) NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS educations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
-    type text DEFAULT 'full-time' CHECK(type = ANY(ARRAY['part-time', 'full-time'])),
+    type text DEFAULT 'Full time' CHECK(type = ANY(ARRAY['Part time', 'Full time'])),
     institute varchar(255) NOT NULL,
     degree varchar(50) NOT NULL,
     discipline varchar(50) NOT NULL,    -- field of study
@@ -50,7 +49,7 @@ CREATE TABLE IF NOT EXISTS educations (
 CREATE TABLE IF NOT EXISTS experiences (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES profiles(user_id) NOT NULL,
-    type text DEFAULT 'job' CHECK(type = ANY(ARRAY['job', 'internship'])),
+    type text DEFAULT 'Job' CHECK(type = ANY(ARRAY['Job', 'Internship'])),
     organisation varchar(255) NOT NULL,
     designation varchar(255) NOT NULL,
     location varchar(255) NOT NULL,
@@ -61,7 +60,8 @@ CREATE TABLE IF NOT EXISTS experiences (
 );
 
 CREATE TABLE IF NOT EXISTS membership_applications (
-    user_id uuid REFERENCES profiles(user_id) PRIMARY KEY NOT NULL,
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES profiles(user_id) NOT NULL,
     membership_level text NOT NULL CHECK(membership_level = ANY(ARRAY['level1_networking', 'level2_volunteering'])),
     sign VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
