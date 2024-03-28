@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { getMembershipApplicationByUserId, getMembershipApplications } from '../controllers/admin.controller.js';
+import { getMembershipApplicationById, getMembershipApplications, updateMembershipApplicationStatus } from '../controllers/admin.controller.js';
 
 const router = Router();
 
 router.get('/membership-applications', getMembershipApplications);
-router.get('/membership-applications/:userId', getMembershipApplicationByUserId);
+router.get('/membership-applications/:id', getMembershipApplicationById);
+router.patch('/membership-applications/:id', updateMembershipApplicationStatus);
 
 export default router;

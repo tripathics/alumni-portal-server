@@ -7,7 +7,11 @@ class User {
   }
 
   static async findById(id) {
-    const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+    const result = await db.query(`
+    SELECT users.*, membership_applications.status = 'pending' as "profile_locked" 
+    FROM users LEFT JOIN membership_applications ON users.id = membership_applications.user_id 
+    WHERE users.id = $1
+    `, [id]);
     return result.rows[0];
   }
 
@@ -44,16 +48,25 @@ class User {
     return result.rows[0];
   }
 
-  static async updateRole(id, role) {
-    const result = await db.query(`
-      UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
+  static async addRole(id, role) {
+    const { rows: userRecords } = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+    if (userRecords[0].role.includes(role)) return userRecords[0];
+    const { rows: updatedUserRecords } = await db.query(`
+      UPDATE users SET role = array_append(role, $1) WHERE id = $2 RETURNING *
     `, [role, id]);
-    return result.rows[0];
+    return updatedUserRecords[0];
+  }
+
+  static async removeRole(id, role) {
+    const { rows } = await db.query(`
+      UPDATE users SET role = array_remove(role, $1) WHERE id = $2 RETURNING *
+    `, [role, id]);
+    return rows[0];
   }
 
   static async delete(id) {
-    const result = await db.query('DELETE FROM users WHERE id = $1', [id]);
-    return result.rowCount > 0;
+    const { rowCount } = await db.query('DELETE FROM users WHERE id = $1', [id]);
+    return rowCount > 0;
   }
 }
 

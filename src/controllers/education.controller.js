@@ -13,6 +13,9 @@ export const getEducations = async (req, res, next) => {
 
 export const createUpdateEducation = async (req, res, next) => {
   const { user, body } = req;
+  if (user.profile_locked) {
+    return res.status(400).json({ success: false, message: 'Profile is locked' });
+  }
   try {
     await Educations.createOrUpdate(user.id, body);
     res.status(200).json({ success: true, message: 'Education updated' });
@@ -23,6 +26,9 @@ export const createUpdateEducation = async (req, res, next) => {
 
 export const deleteEducation = async (req, res, next) => {
   const { user, query: { id } } = req;
+  if (user.profile_locked) {
+    return res.status(400).json({ success: false, message: 'Profile is locked' });
+  }
   try {
     const educationRecord = await Educations.findById(id);
     if (educationRecord.user_id !== user.id && !user.role.includes('admin')) {
