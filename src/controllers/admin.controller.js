@@ -32,7 +32,7 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
 
     const membershipApplicationRecord = await MembershipApplications.updateStatus(id, status);
     if (membershipApplicationRecord.status === 'approved') {
-      // append 'alumni' role to user
+      // add 'alumni' role to user
       const userRecord = await User.addRole(membershipApplicationRecord.user_id, 'alumni');
       if (userRecord.role.includes('alumni')) {
         res.status(201).json({ message: 'Membership application status approved successfully', membershipApplicationRecord });
@@ -40,6 +40,15 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
     } else {
       res.status(201).json({ message: 'Membership application rejected successfully', membershipApplicationRecord });
     }
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.findWithBasicProfile();
+    res.status(200).json({ users });
   } catch (err) {
     next(err);
   }

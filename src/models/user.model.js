@@ -2,8 +2,15 @@ import db from '../config/db.config.js';
 
 class User {
   static async find() {
-    const result = await db.query('SELECT * FROM users');
-    return result.rows;
+    const { rows } = await db.query('SELECT id, email, role FROM users');
+    return rows;
+  }
+
+  static async findWithBasicProfile() {
+    const { rows } = await db.query(`
+    SELECT users.id, users.email, users.role, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar
+    FROM users LEFT JOIN profiles ON users.id = profiles.user_id`);
+    return rows;
   }
 
   static async findById(id) {
