@@ -8,8 +8,8 @@ export const getSign = async (req, res, next) => {
   try {
     // if user is not admin, check if it's their own sign
     if (!req.user.role.includes('admin')) {
-      const sign = await MembershipApplications.getSignByUserId(userId);
-      if (sign !== filename) {
+      const isUserSign = await MembershipApplications.verifyUserSign(userId, filename);
+      if (!isUserSign) {
         return res.status(403).send('Forbidden');
       }
     }

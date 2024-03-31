@@ -56,7 +56,7 @@ class Profile {
   }
 
   static async createOrUpdate(userId, profileData) {
-    const columns = profileColumns.filter((column) => !!profileData[column] && column !== 'user_id');
+    const columns = profileColumns.filter((column) => profileData[column] !== undefined && column !== 'user_id');
     const values = [userId, ...columns.map((column) => profileData[column])];
 
     const sql = `

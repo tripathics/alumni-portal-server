@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS profiles (
-    user_id uuid REFERENCES users(id) PRIMARY KEY,    
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,    
     title text NOT NULL CHECK(title = ANY(ARRAY['Mr','Mrs','Ms','Dr'])),
     first_name varchar(64) NOT NULL,
     last_name varchar(64),
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 CREATE TABLE IF NOT EXISTS educations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES profiles(user_id) NOT NULL,
+    user_id uuid REFERENCES profiles(user_id) ON DELETE CASCADE NOT NULL,
     type text DEFAULT 'Full time' CHECK(type = ANY(ARRAY['Part time', 'Full time'])),
     institute varchar(255) NOT NULL,
     degree varchar(50) NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS educations (
 
 CREATE TABLE IF NOT EXISTS experiences (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES profiles(user_id) NOT NULL,
+    user_id uuid REFERENCES profiles(user_id) ON DELETE CASCADE NOT NULL,
     type text DEFAULT 'Job' CHECK(type = ANY(ARRAY['Job', 'Internship'])),
     organisation varchar(255) NOT NULL,
     designation varchar(255) NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS experiences (
 
 CREATE TABLE IF NOT EXISTS membership_applications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id uuid REFERENCES profiles(user_id) NOT NULL,
+    user_id uuid REFERENCES profiles(user_id) ON DELETE CASCADE NOT NULL,
     membership_level text NOT NULL CHECK(membership_level = ANY(ARRAY['level1_networking', 'level2_volunteering'])),
     sign VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),

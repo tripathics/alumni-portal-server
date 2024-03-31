@@ -5,7 +5,7 @@ import ApiError from './ApiError.util.js';
 
 const MAX_ATTEMPTS = 5;
 
-export const sendOTPEmail = (email, otp) => {
+export const sendOTPEmail = async (email, otp) => {
   const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -27,15 +27,15 @@ padding-top: 2rem;
 }
 .container {
 background-color: #fff;
-box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px,
-rgba(0, 0, 0, 0.11) 0px 0.3px 0.9px 0px;
+border: solid 1px #e1e1e1;
 border-radius: 2px;
 padding: 1.4rem;
 max-width: 380px;
 margin: auto;
 }
 .header {
-text-align: center;
+width: fit-content;
+margin: auto;
 }
 h1 {
 font-size: 1.2rem;
@@ -44,36 +44,16 @@ margin: 1rem 0;
 font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 p {
-font-size: 1rem;
-color: #333;
+font-size: 0.9rem;
+color: #222;
+margin: 0.8rem 0;
 }
 .primary {
 color: #18621f;
 }
-main {
-text-align: center;
-}
-.otp-box-wrapper {
-height: 2.8rem;
-}
-.otp-box {
-width: fit-content;
-border: solid 1px rgba(0, 0, 0, 0.11);
-box-shadow: rgba(0, 0, 0, 0.133) 0px 1.6px 3.6px 0px;
-padding: 0.3rem 0.6rem;
-margin: 0.4rem auto;
-}
-.otp {
-font-family: "Courier New", Courier, monospace;
-font-size: 1.2rem;
-letter-spacing: 0.075rem;
-}
 .footer {
-margin-top: 2rem;
+margin-top: 1rem;
 font-size: 0.9rem;
-}
-.footer h4 {
-margin: 1.4rem 0 0.2rem;
 }
 .footer > * {
 font-size: inherit;
@@ -84,26 +64,57 @@ font-size: inherit;
 <div class="container">
 <header class="header">
 <img
-src="http://localhost:5173/navbar-banner.svg"
+src="https://raw.githubusercontent.com/tripathics/alumni-portal-client/main/public/navbar-banner.png"
 alt="NIT Arunachal Pradesh Alumni Association"
 style="width: 200px; height: auto"
 />
 </header>
 <main>
-<h1 class="primary">OTP for your NIT AP Alumni Account</h1>
+<div style="margin: 1rem auto; width: fit-content">
+<table
+width="180"
+border="0"
+align="center"
+cellpadding="0"
+cellspacing="0"
+>
+<tbody>
+<tr>
+<td
+bgcolor="#FFFFFF"
+style="
+font-size: 18px;
+line-height: 22px;
+font-family: 'Zurich BT', Tahoma, Helvetica, Arial;
+text-align: center;
+color: rgb(0, 0, 0);
+border-width: 1px;
+border-style: dashed;
+border-color: rgb(204, 204, 204);
+padding: 10px 5px;
+letter-spacing: 0.15ch;
+"
+>
+<strong>${otp}</strong>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div>
-<p>Your One Time Password is</p>
-<div class="otp-box-wrapper">
-<div class="otp-box">
-<strong class="otp">${otp}</strong>
+<p>
+Please use the above One Time Password (OTP) for your NITAP Alumni
+Association account. This OTP is valid for next 5 minutes.
+</p>
+<p style="font-style: italic">
+For security purposes, please do not share OTP or Password with
+anyone.
+</p>
 </div>
-</div>
-</div>
-<p>This OTP will expire in 5 minutes</p>
 </main>
 <footer class="footer">
-<h4>Best Regards</h4>
 <p>
+Best Regards,<br />
 Alumni association<br />
 NIT Arunachal Pradesh
 </p>
@@ -111,7 +122,6 @@ NIT Arunachal Pradesh
 </div>
 </body>
 </html>
-
   `;
   const mailOptions = {
     from: process.env.NODEMAILER_EMAIL,
@@ -120,13 +130,12 @@ NIT Arunachal Pradesh
     html: emailHtml,
   };
 
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
-      logger.error(`Error sending OTP email to ${email}: ${err.message}`);
-      throw new ApiError(500, 'OTP', 'Error sending OTP email');
-    }
-    logger.log(`OTP ${otp} sent to ${email}: ${info}`);
-  });
+  try {
+    await transporter.sendMail(mailOptions);
+    logger.info(`OTP: ${otp} sent to ${email}`);
+  } catch (error) {
+    throw new ApiError(500, 'OTP', 'Error sending OTP email');
+  }
 };
 
 export const generateOTP = async (email) => {

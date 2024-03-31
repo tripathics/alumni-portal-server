@@ -3,7 +3,9 @@ import User from '../models/user.model.js';
 
 export const getMembershipApplications = async (req, res, next) => {
   try {
-    const membershipApplicationRecords = await MembershipApplications.findAll();
+    const membershipApplicationRecords = await MembershipApplications.find({
+      'membership_application.status': 'pending',
+    });
     res.json(membershipApplicationRecords);
   } catch (err) {
     next(err);

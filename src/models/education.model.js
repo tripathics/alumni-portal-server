@@ -15,7 +15,7 @@ const educationColumns = [
 
 class Educations {
   static async createOrUpdate(userId, educationData) {
-    const columns = educationColumns.filter((column) => !!educationData[column] && column !== 'user_id');
+    const columns = educationColumns.filter((column) => educationData[column] !== undefined && column !== 'user_id');
     const values = [userId, ...columns.map((column) => educationData[column])];
 
     // only allow NIT Arunachal Pradesh education as first insert for a user

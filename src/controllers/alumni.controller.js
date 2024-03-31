@@ -34,3 +34,27 @@ export const submitMembershipForm = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getPastApplications = async (req, res, next) => {
+  const { id } = req.user;
+  const filters = { 'membership_applications.user_id': id };
+  try {
+    const pastApplications = await MembershipApplications.find(filters);
+    res.status(200).json(pastApplications);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getApplication = async (req, res, next) => {
+  const { params: { id }, user: { id: userId } } = req;
+  try {
+    const application = await MembershipApplications.findById(id);
+    if (application.user_id !== userId) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    res.status(200).json(application);
+  } catch (error) {
+    next(error);
+  }
+};

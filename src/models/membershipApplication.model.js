@@ -15,34 +15,35 @@ class MembershipApplications {
     return rows;
   }
 
-  static async getSignByUserId(userId) {
-    const { rows } = await db.query('SELECT sign FROM membership_applications WHERE user_id = $1', [userId]);
-    return rows[0]?.sign;
+  static async verifyUserSign(userId, sign) {
+    const { rowCount } = await db.query('SELECT * FROM membership_applications WHERE user_id = $1 AND sign = $2', [userId, sign]);
+    return rowCount > 0;
   }
 
   /**
    * Find a list of membership applications given filters.
    */
-  static async find(filters) {
+  static async find(filters = {}) {
     let sql = `
-    SELECT membership_applications.*,
-    profiles.*,
-    users.email,
+    SELECT membership_applications.*, users.email,
+    profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
     educations.degree, educations.discipline, educations.end_date as graduation_date, educations.start_date as enrollment_date 
     FROM membership_applications 
     LEFT JOIN users ON membership_applications.user_id = users.id
     LEFT JOIN profiles ON membership_applications.user_id = profiles.user_id
     LEFT JOIN educations ON membership_applications.user_id = educations.user_id
-    WHERE AND educations.institute = ${NITAP}`;
+    WHERE educations.institute = $1`;
 
-    const values = [];
+    const values = [NITAP];
     Object.entries(filters).forEach(([key, value], index) => {
-      sql += ` AND ${key} = $${index + 1}`;
+      sql += ` AND ${key} = $${index + 2}`;
       values.push(value);
     });
 
+    sql += ' ORDER BY membership_applications.created_at DESC';
+
     const { rows } = await db.query(sql, values);
-    return rows[0];
+    return rows;
   }
 
   static async findById(id) {

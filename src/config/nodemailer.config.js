@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import ApiError from '../utils/ApiError.util.js';
 
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
@@ -14,5 +15,13 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized: false,
   },
 });
+
+export const verifyTransporterConnection = async () => {
+  try {
+    await transporter.verify();
+  } catch (err) {
+    throw new ApiError(500, 'NODEMAILER', `SMTP connection failed: ${err.message}`);
+  }
+};
 
 export default transporter;
