@@ -31,7 +31,10 @@ class Profile {
     const result = await db.query(`
       SELECT users.email, users.role, 
       profiles.*,
-      membership_applications.status = 'pending' as "profile_locked"
+      EXISTS (
+        SELECT 1 FROM membership_applications 
+        WHERE users.id = membership_applications.user_id AND status = 'pending'
+      ) as "profile_locked"
       FROM profiles
       RIGHT JOIN users ON users.id = profiles.user_id
       LEFT JOIN membership_applications ON users.id = membership_applications.user_id
@@ -45,7 +48,10 @@ class Profile {
     const result = await db.query(`
     SELECT users.email, profiles.*, 
     educations.degree, educations.discipline, educations.start_date as enrollment_date, educations.end_date as graduation_date,
-    membership_applications.status = 'pending' as "profile_locked"
+    EXISTS (
+      SELECT 1 FROM membership_applications 
+      WHERE users.id = membership_applications.user_id AND status = 'pending'
+    ) as "profile_locked"
     FROM profiles LEFT JOIN educations ON profiles.user_id = educations.user_id
     LEFT JOIN users ON users.id = profiles.user_id
     LEFT JOIN membership_applications ON users.id = membership_applications.user_id

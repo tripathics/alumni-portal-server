@@ -29,7 +29,7 @@ export const submitMembershipForm = async (req, res, next) => {
   }
   try {
     await MembershipApplications.create(user.id, { ...membershipFormData, sign });
-    res.status(201).json({ message: 'Membership application submitted' });
+    res.status(201).json({ success: true, message: 'Application submitted successfully' });
   } catch (error) {
     next(error);
   }

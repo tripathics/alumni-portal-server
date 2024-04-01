@@ -15,7 +15,11 @@ class User {
 
   static async findById(id) {
     const result = await db.query(`
-    SELECT users.*, membership_applications.status = 'pending' as "profile_locked" 
+    SELECT users.*,
+    EXISTS (
+      SELECT 1 FROM membership_applications 
+      WHERE users.id = membership_applications.user_id AND status = 'pending'
+    ) as "profile_locked"
     FROM users LEFT JOIN membership_applications ON users.id = membership_applications.user_id 
     WHERE users.id = $1
     `, [id]);
@@ -30,7 +34,10 @@ class User {
   static async findByEmailWithProfile(email) {
     const result = await db.query(`
       SELECT users.*, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
-      membership_applications.status = 'pending' as "profile_locked"
+      EXISTS (
+        SELECT 1 FROM membership_applications 
+        WHERE users.id = membership_applications.user_id AND status = 'pending'
+      ) as "profile_locked"
       FROM users
       LEFT JOIN profiles ON users.id = profiles.user_id
       LEFT JOIN membership_applications ON users.id = membership_applications.user_id 
