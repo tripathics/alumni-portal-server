@@ -48,4 +48,22 @@ const migrate = async () => {
   }
 };
 
-migrate();
+const migrateDown = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query('DROP SCHEMA public CASCADE');
+    await client.query('CREATE SCHEMA public');
+    console.log('Migration down complete');
+  } catch (error) {
+    console.error('Migration down failed', error.message);
+  } finally {
+    client.release();
+  }
+};
+
+// when run migrate down drop all tables else call migrate()
+if (process.argv[2] === 'down') {
+  migrateDown();
+} else {
+  migrate();
+}

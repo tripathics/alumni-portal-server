@@ -11,7 +11,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "prepare": "husky",
-    "migrate": "node ./src/database/migrate.js"
+    "migrate": "node ./src/database/migrate.js",
+    "migrate:down": "node ./src/database/migrate.js down"
   },
   "author": "Chandrashekhar Tripathi",
   "license": "ISC",
