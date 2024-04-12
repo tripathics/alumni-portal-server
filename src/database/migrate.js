@@ -39,7 +39,7 @@ const migrate = async () => {
     await client.query(sql);
     console.log('Migration complete');
 
-    // seed admin
+    // seed admin user
     await seedAdmin(client);
   } catch (error) {
     console.error('Migration failed', error.message);
