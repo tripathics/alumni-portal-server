@@ -15,7 +15,7 @@ const experienceColumns = [
 
 class Experiences {
   static async createOrUpdate(userId, experienceData) {
-    const columns = experienceColumns.filter((column) => experienceData[column] !== undefined && column !== 'user_id');
+    const columns = experienceColumns.filter((column) => !!experienceData[column] && column !== 'user_id');
     const values = [userId, ...columns.map((column) => experienceData[column])];
 
     const sql = `
