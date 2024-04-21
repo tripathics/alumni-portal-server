@@ -37,10 +37,10 @@ const migrate = async () => {
   try {
     const sql = (await fs.promises.readFile(path.join(DIRNAME, './database.sql'))).toString();
     await client.query(sql);
-    console.log('Migration complete');
 
     // seed admin user
     await seedAdmin(client);
+    console.log('Migration complete');
   } catch (error) {
     console.error('Migration failed', error.message);
   } finally {

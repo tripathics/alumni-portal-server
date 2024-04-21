@@ -14,7 +14,7 @@ app.listen(PORT, async () => {
     await verifyTransporterConnection();
     logger.info('SMTP connection verified! Ready for emails');
 
-    logger.info(`Server is running on port ${PORT}`);
+    logger.info(`Server is running on port ${PORT} on ${process.env.NODE_ENV} env`);
   } catch (err) {
     logger.error(err.message);
   }

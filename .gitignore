@@ -29,3 +29,7 @@ node_modules
 
 # media files
 media/
+
+# build files
+dist/
+build/

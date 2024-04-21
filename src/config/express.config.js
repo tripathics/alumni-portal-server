@@ -1,27 +1,38 @@
 import express from 'express';
+import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import routes from '../routes/index.route.js';
-import { errorHandler, notFoundErrorHandler } from '../middlewares/error.middleware.js';
+import logger from './logger.config.js';
+import { CLIENT_DIR } from './storage.config.js';
+import path from 'path';
 
 const app = express();
 
+logger.stream = {
+  write: (message) => logger.info(message.trim()),
+};
+app.use(morgan('dev', { stream: logger.stream }));
+
 if (process.env.NODE_ENV === 'development') {
   app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+      callback(null, true);
+    },
     credentials: true,
   }));
+} else if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(CLIENT_DIR));
 }
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(routes);
 
-app.get('/', (req, res) => {
-  res.send('Hello World! Welcome to Alumni Portal NIT Arunachal Pradesh!');
-});
-
-app.use(notFoundErrorHandler);
-app.use(errorHandler);
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(CLIENT_DIR, 'index.html'));
+  });
+}
 
 export default app;
