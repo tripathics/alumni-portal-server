@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS users (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     email varchar(50) NOT NULL UNIQUE,
     password varchar(100) NOT NULL,
-    role text[] NOT NULL CHECK(role <@ ARRAY['admin', 'user', 'alumni']) DEFAULT ARRAY['user']
+    role text[] NOT NULL CHECK(role <@ ARRAY['admin', 'coordinator', 'alumni', 'user']) DEFAULT ARRAY['user'],
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS profiles (
@@ -81,6 +82,51 @@ CREATE TABLE IF NOT EXISTS otp_email (
 CREATE TABLE IF NOT EXISTS otp_email_attempts (
     email varchar(50) PRIMARY KEY NOT NULL,
     attempts INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS web_director_message (
+    director_name varchar(100) NOT NULL,
+    director_message text NOT NULL,
+    director_email varchar(50) DEFAULT NULL,
+    director_phone varchar(100) DEFAULT NULL,
+    director_avatar varchar(255) DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS web_president_message (  
+    president_name varchar(100) NOT NULL,
+    president_email varchar(50) DEFAULT NULL,
+    president_phone varchar(100) DEFAULT NULL,
+    president_designation varchar(100) DEFAULT NULL,
+    president_message text NOT NULL,
+    president_avatar varchar(255) DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contributors (
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
+    contribution varchar(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    title varchar(255) NOT NULL,
+    description text NOT NULL,
+    start_date date NOT NULL,
+    end_date date DEFAULT NULL,
+    location varchar(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS posts (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    title varchar(255) NOT NULL,
+    content text NOT NULL,
+    pictures text[] DEFAULT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
