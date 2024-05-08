@@ -63,7 +63,9 @@ const migrateDown = async () => {
 
 // when run migrate down drop all tables else call migrate()
 if (process.argv[2] === 'down') {
+  console.log('Migrating down...');
   migrateDown();
 } else {
+  console.log('Migrating...');
   migrate();
 }
