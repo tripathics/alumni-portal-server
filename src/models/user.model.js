@@ -1,4 +1,5 @@
 import db from '../config/db.config.js';
+import NITAP from '../utils/constants.util.js';
 
 class User {
   static async find() {
@@ -37,12 +38,17 @@ class User {
       EXISTS (
         SELECT 1 FROM membership_applications 
         WHERE users.id = membership_applications.user_id AND status = 'pending'
-      ) as "profile_locked"
+      ) as "profile_locked",
+      EXISTS (
+        SELECT 1 FROM educations
+        WHERE users.id = educations.user_id AND educations.institute = $1
+      ) as "education_at_nitap_exists"
       FROM users
       LEFT JOIN profiles ON users.id = profiles.user_id
       LEFT JOIN membership_applications ON users.id = membership_applications.user_id 
-      WHERE users.email = $1
-    `, [email]);
+      LEFT JOIN educations ON users.id = educations.user_id
+      WHERE users.email = $2
+    `, [NITAP, email]);
 
     return result.rows[0];
   }

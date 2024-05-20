@@ -54,7 +54,7 @@ class MembershipApplications {
       'INSERT INTO membership_applications (user_id, membership_level, sign) VALUES ($1, $2, $3) RETURNING *',
       [userId, data.membership_level, data.sign],
     );
-    return rows;
+    return rows[0];
   }
 
   static async updateStatus(id, status) {

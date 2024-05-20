@@ -8,7 +8,7 @@ export const prefillMembershipForm = async (req, res, next) => {
   try {
     const profile = await Profile.findProfileWithEducationAtNITAP(req.user.email);
     if (!profile) {
-      return res.status(404).json({ message: 'Complete your profile with education details at NIT Arunachal Pradesh to apply for membership' });
+      return res.status(401);
     }
     res.status(200).json(profile);
   } catch (error) {
@@ -28,8 +28,10 @@ export const submitMembershipForm = async (req, res, next) => {
     return res.status(400).json({ message: 'Signature is required' });
   }
   try {
-    await MembershipApplications.create(user.id, { ...membershipFormData, sign });
-    res.status(201).json({ success: true, message: 'Application submitted successfully' });
+    const application = await MembershipApplications.create(user.id, {
+      ...membershipFormData, sign,
+    });
+    res.status(201).json({ success: true, message: 'Application submitted successfully', application });
   } catch (error) {
     next(error);
   }
