@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../middlewares/authenticate.middleware.js';
 import {
-  login, register, readProfile, updateProfile, logout, updateAvatar,
+  login, register, readProfile, updateProfile, getProfileCompletionStatus, logout, updateAvatar,
   checkEmailNotExists, readUser, checkEmailExists, updatePassword,
 } from '../controllers/user.controller.js';
 import { createUpdateEducation, deleteEducation, getEducations } from '../controllers/education.controller.js';
@@ -12,6 +12,7 @@ import { updateAvatarFile } from '../middlewares/media.middleware.js';
 const router = Router();
 
 router.get('/u', authenticate, readUser);
+router.get('/profile-completion-status', authenticate, getProfileCompletionStatus);
 router.post('/register-otp-gen', checkEmailNotExists, generate);
 router.post('/auth-otp-gen', checkEmailExists, generate);
 router.post('/update-password', updatePassword);

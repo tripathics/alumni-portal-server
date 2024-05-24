@@ -1,4 +1,5 @@
 import db from '../config/db.config.js';
+import NITAP from '../utils/constants.util.js';
 
 const profileColumns = [
   'user_id',
@@ -59,6 +60,24 @@ class Profile {
     `, [email, 'National Institute of Technology, Arunachal Pradesh']);
 
     return result.rows[0];
+  }
+
+  static async findProfileCompletionStatus(email) {
+    const { rows } = await db.query(`
+    SELECT EXISTS (
+      SELECT 1 FROM profiles WHERE user_id = users.id
+    ) as "personal_profile",
+    EXISTS (
+      SELECT 1 FROM membership_applications
+      WHERE users.id = membership_applications.user_id AND status != 'rejected'
+    ) as "membership_application",
+    EXISTS (
+      SELECT institute FROM educations
+      WHERE users.id = educations.user_id AND educations.institute=$1
+    ) as "education" FROM users where email=$2
+    `, [NITAP, email]);
+
+    return rows[0];
   }
 
   static async createOrUpdate(userId, profileData) {

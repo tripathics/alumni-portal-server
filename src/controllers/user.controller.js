@@ -141,6 +141,16 @@ export const readProfile = async (req, res, next) => {
   }
 };
 
+export const getProfileCompletionStatus = async (req, res, next) => {
+  try {
+    const { email } = req.user;
+    const profileCompletionStatus = await Profile.findProfileCompletionStatus(email);
+    res.status(200).json({ profileCompletionStatus, message: 'Profile completion status', success: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateProfile = async (req, res, next) => {
   if (req.user.profile_locked) {
     return res.status(400).json({ message: 'Profile is locked' });
