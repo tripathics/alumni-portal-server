@@ -7,8 +7,10 @@ const { Pool } = pg;
 const PGDATEOID = 1082;
 pg.types.setTypeParser(PGDATEOID, (value) => value);
 
+const pgUrl = process.env.NODE_ENV === 'production' ? process.env.PGURL : process.env.PGURL_DEV;
+
 const pool = new Pool({
-  connectionString: process.env.PGURL,
+  connectionString: pgUrl,
 });
 
 export const verifyDbConnection = async () => {

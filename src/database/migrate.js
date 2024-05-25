@@ -9,8 +9,10 @@ import url from 'url';
 import bcrypt from 'bcrypt';
 import pg from 'pg';
 
+const pgUrl = process.env.NODE_ENV === 'production' ? process.env.PGURL : process.env.PGURL_DEV;
+
 const pool = new pg.Pool({
-  connectionString: process.env.PGURL,
+  connectionString: pgUrl,
 });
 
 const FILENAME = url.fileURLToPath(import.meta.url);
