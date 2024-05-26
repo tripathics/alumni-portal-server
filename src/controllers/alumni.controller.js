@@ -8,7 +8,7 @@ export const prefillMembershipForm = async (req, res, next) => {
   try {
     const profile = await Profile.findProfileWithEducationAtNITAP(req.user.email);
     if (!profile) {
-      return res.status(401);
+      return res.status(403).json({ message: 'Profile is incomplete' });
     }
     res.status(200).json(profile);
   } catch (error) {
