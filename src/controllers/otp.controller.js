@@ -16,7 +16,7 @@ const generate = async (req, res, next) => {
     if (!generatedOTP) {
       throw new ApiError(500, 'OTP', 'Error generating OTP');
     }
-    sendOTPEmail(email, generatedOTP.otp);
+    await sendOTPEmail(email, generatedOTP.otp);
     res.status(201).json({
       success: true,
       message: 'OTP sent to email',
