@@ -1,5 +1,7 @@
 import db from '../config/db.config.js';
 import ApiError from '../utils/ApiError.util.js';
+import NITAP from '../utils/constants.util.js';
+import MembershipApplications from './membershipApplication.model.js';
 
 const educationColumns = [
   'id',
@@ -18,10 +20,21 @@ class Educations {
     const columns = educationColumns.filter((column) => educationData[column] !== undefined && column !== 'user_id');
     const values = [userId, ...columns.map((column) => educationData[column])];
 
+    // don't allow to update education at NITAP
+    if (educationData.id && educationData.institute === NITAP) {
+      const membershipForms = await MembershipApplications.find({ 'membership_applications.user_id': userId });
+
+      if (membershipForms.some((form) => form.status === 'approved' || form.status === 'pending')) {
+        throw new ApiError(403, 'Education', `Updating education details at ${NITAP} is not allowed unless membership application is rejected`);
+      }
+    }
+
     // only allow NIT Arunachal Pradesh education as first insert for a user
-    const existingEducation = await this.findByUserId(userId);
-    if (!educationData.id && !existingEducation.length && educationData.institute !== 'National Institute of Technology, Arunachal Pradesh') {
-      throw new ApiError(400, 'Education', 'First education should be of National Institute of Technology, Arunachal Pradesh');
+    if (!educationData.id && educationData.institute !== NITAP) {
+      const existingEducation = await this.findByUserId(userId);
+      if (!existingEducation.length) {
+        throw new ApiError(400, 'Education', `First education should be of ${NITAP}`);
+      }
     }
 
     const sql = `
@@ -37,6 +50,11 @@ class Educations {
 
   static async findByUserId(userId) {
     const result = await db.query('SELECT * FROM educations WHERE user_id = $1', [userId]);
+    return result.rows;
+  }
+
+  static async findNITAPByUserId(userId) {
+    const result = await db.query('SELECT * FROM educations WHERE user_id = $1 AND institute = $2', [userId, NITAP]);
     return result.rows;
   }
 

@@ -4,10 +4,10 @@ import { AVATAR_DIR, SIGN_DIR } from '../config/storage.config.js';
 import MembershipApplications from '../models/membershipApplication.model.js';
 
 export const getSign = async (req, res, next) => {
-  const { params: { filename }, user: { id: userId } } = req;
+  const { params: { filename }, tokenPayload: { id: userId, role: userRole } } = req;
   try {
     // if user is not admin, check if it's their own sign
-    if (!req.user.role.includes('admin')) {
+    if (!userRole.includes('admin')) {
       const isUserSign = await MembershipApplications.verifyUserSign(userId, filename);
       if (!isUserSign) {
         return res.status(403).send('Forbidden');

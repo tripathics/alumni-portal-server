@@ -57,7 +57,7 @@ class Profile {
     LEFT JOIN users ON users.id = profiles.user_id
     LEFT JOIN membership_applications ON users.id = membership_applications.user_id
     WHERE users.email = $1 AND educations.institute = $2
-    `, [email, 'National Institute of Technology, Arunachal Pradesh']);
+    `, [email, NITAP]);
 
     return result.rows[0];
   }
@@ -65,6 +65,9 @@ class Profile {
   static async findProfileCompletionStatus(email) {
     const { rows } = await db.query(`
     SELECT EXISTS (
+      SELECT avatar FROM profiles WHERE user_id = users.id
+    ) as "avatar",
+    EXISTS (
       SELECT 1 FROM profiles WHERE user_id = users.id
     ) as "personal_profile",
     EXISTS (
@@ -104,6 +107,17 @@ class Profile {
     `, [avatar, userId]);
 
     return result.rows[0];
+  }
+
+  static async profileStatus(userId) {
+    const user = await db.query(`
+      SELECT EXISTS (
+        SELECT 1 FROM membership_applications 
+        WHERE user_id = $1 AND status = 'pending'
+      ) as "profile_locked"
+    `, [userId]);
+
+    return !!user.rows[0].profile_locked;
   }
 }
 

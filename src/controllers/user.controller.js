@@ -6,6 +6,10 @@ import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
 import deleteFile from '../utils/media.util.js';
 
+export const validateSession = async (req, res) => {
+  res.status(200).json({ message: 'Session is valid', success: true });
+};
+
 export const checkEmailNotExists = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -111,7 +115,7 @@ export const login = async (req, res, next) => {
 
 export const readUser = async (req, res, next) => {
   try {
-    const { email } = req.user;
+    const { email } = req.tokenPayload;
     const userProfileRecord = await User.findByEmailWithProfile(email);
     if (!userProfileRecord) {
       throw new ApiError(404, 'User', 'User not found');
@@ -130,7 +134,7 @@ export const logout = async (req, res) => {
 
 export const readProfile = async (req, res, next) => {
   try {
-    const { email } = req.user;
+    const { email } = req.tokenPayload;
     const profileRecord = await Profile.findByEmail(email);
     if (!profileRecord) {
       return res.status(404).json({ message: 'Profile not found' });
@@ -143,7 +147,7 @@ export const readProfile = async (req, res, next) => {
 
 export const getProfileCompletionStatus = async (req, res, next) => {
   try {
-    const { email } = req.user;
+    const { email } = req.tokenPayload;
     const profileCompletionStatus = await Profile.findProfileCompletionStatus(email);
     res.status(200).json({ profileCompletionStatus, message: 'Profile completion status', success: true });
   } catch (error) {
@@ -152,14 +156,21 @@ export const getProfileCompletionStatus = async (req, res, next) => {
 };
 
 export const updateProfile = async (req, res, next) => {
-  if (req.user.profile_locked) {
-    return res.status(400).json({ message: 'Profile is locked' });
-  }
   try {
-    const { id: userId } = req.user;
+    const { id: userId, email } = req.tokenPayload;
+
+    // update avatar if provided
+    const newAvatar = req.file?.filename;
+    const userProfile = await Profile.findByEmail(email);
+    if (newAvatar && userProfile.avatar) {
+      deleteFile(userProfile.avatar, 'avatar');
+    }
+
     const profileData = req.body;
 
-    const updatedProfile = await Profile.createOrUpdate(userId, profileData);
+    const updatedProfile = await Profile.createOrUpdate(userId, {
+      ...profileData, avatar: newAvatar,
+    });
     res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
   } catch (error) {
     next(error);
@@ -168,7 +179,7 @@ export const updateProfile = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
-    const { id: userId, email } = req.user;
+    const { id: userId, email } = req.tokenPayload;
     const avatar = req.file?.filename;
 
     // delete old avatar
@@ -178,6 +189,7 @@ export const updateAvatar = async (req, res, next) => {
     }
 
     const result = await Profile.updateAvatar(userId, avatar);
+    console.log('update avatar result', result);
     res.status(200).json({ success: true, result, message: 'Avatar updated' });
   } catch (error) {
     next(error);

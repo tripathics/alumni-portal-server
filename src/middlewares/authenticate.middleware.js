@@ -1,5 +1,4 @@
 import { verifyToken } from '../utils/jwt.util.js';
-import User from '../models/user.model.js';
 import logger from '../config/logger.config.js';
 
 export const authenticate = async (req, res, next) => {
@@ -10,11 +9,10 @@ export const authenticate = async (req, res, next) => {
 
   try {
     const payload = verifyToken(token);
-    const user = await User.findById(payload.id);
-    if (!user) {
+    if (!payload?.id) {
       return res.clearCookie('auth').status(401).json({ message: 'Invalid token' });
     }
-    req.user = user;
+    req.tokenPayload = payload;
     next();
   } catch (err) {
     if (err.message === 'Token expired') {
@@ -27,7 +25,7 @@ export const authenticate = async (req, res, next) => {
 
 export const authenticateAdmin = async (req, res, next) => {
   authenticate(req, res, () => {
-    if (!req.user.role.includes('admin')) {
+    if (!req.tokenPayload.role.includes('admin')) {
       return res.status(403).json({ message: 'Forbidden' });
     }
     next();

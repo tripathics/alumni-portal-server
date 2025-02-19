@@ -2,7 +2,7 @@ import Experiences from '../models/experience.model.js';
 import ApiError from '../utils/ApiError.util.js';
 
 export const getExperiences = async (req, res, next) => {
-  const userId = req.user.id;
+  const userId = req.tokenPayload.id;
   try {
     const experienceRecords = await Experiences.findByUserId(userId);
     res.status(200).json({ success: true, experienceRecords });
@@ -12,9 +12,9 @@ export const getExperiences = async (req, res, next) => {
 };
 
 export const createUpdateExperience = async (req, res, next) => {
-  const { user, body } = req;
+  const { tokenPayload, body } = req;
   try {
-    await Experiences.createOrUpdate(user.id, body);
+    await Experiences.createOrUpdate(tokenPayload.id, body);
     res.status(200).json({ success: true, message: 'Experience updated' });
   } catch (err) {
     next(err);
@@ -22,10 +22,10 @@ export const createUpdateExperience = async (req, res, next) => {
 };
 
 export const deleteExperience = async (req, res, next) => {
-  const { user, query: { id } } = req;
+  const { tokenPayload, query: { id } } = req;
   try {
     const experienceRecord = await Experiences.findById(id);
-    if (experienceRecord.user_id !== user.id && !user.role.includes('admin')) {
+    if (experienceRecord.user_id !== tokenPayload.id && !tokenPayload.role.includes('admin')) {
       throw new ApiError(403, 'Unauthorized');
     }
     await Experiences.delete(id);

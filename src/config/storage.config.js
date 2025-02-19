@@ -34,7 +34,8 @@ const storage = multer.diskStorage({
   },
   filename(req, file, cb) {
     const now = new Date();
-    const userId = req.user.id; // Assuming you have the user ID available in the request object
+    // Assuming you have the user ID available in the request object
+    const userId = req.tokenPayload.id;
     const extname = path.extname(file.originalname).toLowerCase();
     cb(null, userId + now.getTime() + extname);
   },
