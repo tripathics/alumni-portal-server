@@ -26,5 +26,6 @@ module.exports = {
     'consistent-return': 'off',
     'import/extensions': ['error', 'ignorePackages'],
     'import/order': 'off',
+    'import/prefer-default-export': 'off',
   },
 };

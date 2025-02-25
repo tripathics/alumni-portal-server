@@ -1,4 +1,4 @@
-import db from '../config/db.config.js';
+import * as db from '../config/db.config.js';
 
 const experienceColumns = [
   'id',

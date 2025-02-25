@@ -1,4 +1,4 @@
-import db from '../config/db.config.js';
+import * as db from '../config/db.config.js';
 import NITAP from '../utils/constants.util.js';
 
 class MembershipApplications {

@@ -1,4 +1,4 @@
-import db from '../config/db.config.js';
+import * as db from '../config/db.config.js';
 import ApiError from '../utils/ApiError.util.js';
 import NITAP from '../utils/constants.util.js';
 import MembershipApplications from './membershipApplication.model.js';
