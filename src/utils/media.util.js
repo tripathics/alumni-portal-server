@@ -15,4 +15,6 @@ const deleteFile = async (filename, type) => {
   }
 };
 
+export const getUpdatedAvatarUrl = (filename) => `${filename}?updated_at=${new Date().getTime()}}`;
+
 export default deleteFile;

@@ -4,7 +4,7 @@ import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
-import deleteFile from '../utils/media.util.js';
+import { getUpdatedAvatarUrl } from '../utils/media.util.js';
 
 export const validateSession = async (req, res) => {
   res.status(200).json({ message: 'Session is valid', success: true });
@@ -157,19 +157,13 @@ export const getProfileCompletionStatus = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const { id: userId, email } = req.tokenPayload;
-
-    // update avatar if provided
-    const newAvatar = req.file?.filename;
-    const userProfile = await Profile.findByEmail(email);
-    if (newAvatar && userProfile.avatar) {
-      deleteFile(userProfile.avatar, 'avatar');
-    }
+    const { id: userId } = req.tokenPayload;
 
     const profileData = req.body;
 
+    // TODO: delete existing avatar file if new avatar is uploaded
     const updatedProfile = await Profile.createOrUpdate(userId, {
-      ...profileData, avatar: newAvatar,
+      ...profileData, avatar: getUpdatedAvatarUrl(profileData.avatar),
     });
     res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
   } catch (error) {
@@ -179,17 +173,11 @@ export const updateProfile = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
-    const { id: userId, email } = req.tokenPayload;
-    const avatar = req.file?.filename;
+    const { id: userId } = req.tokenPayload;
+    const { avatar } = req.body;
 
-    // delete old avatar
-    const userProfile = await Profile.findByEmail(email);
-    if (userProfile.avatar) {
-      deleteFile(userProfile.avatar, 'avatar');
-    }
-
-    const result = await Profile.updateAvatar(userId, avatar);
-    console.log('update avatar result', result);
+    // TODO: delete existing avatar file if new avatar is uploaded
+    const result = await Profile.updateAvatar(userId, getUpdatedAvatarUrl(avatar));
     res.status(200).json({ success: true, result, message: 'Avatar updated' });
   } catch (error) {
     next(error);

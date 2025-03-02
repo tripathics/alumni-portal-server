@@ -6,12 +6,14 @@ import otpRoute from './otp.route.js';
 import mediaRoute from './media.route..js';
 import alumniRoute from './alumni.route.js';
 import adminRoute from './admin.route.js';
+import { getUploadUrl } from '../controllers/getUploadUrl.js';
 
 const router = Router();
 
 router.use('/media', mediaRoute);
 router.use('/api/users', userRoute);
 router.use('/api/otp', otpRoute);
+router.get('/api/get-upload-url/:type', authenticate, getUploadUrl);
 router.use('/api/alumni', authenticate, alumniRoute);
 router.use('/api/admin', authenticateAdmin, adminRoute);
 

@@ -1,6 +1,10 @@
 import pg from 'pg';
 import ApiError from '../utils/ApiError.util.js';
 
+// Make sure date columns output are in correct format (YYYY-MM-DD)
+const PGDATEOID = 1082;
+pg.types.setTypeParser(PGDATEOID, (value) => value);
+
 const { Pool } = pg;
 
 const pool = new Pool();

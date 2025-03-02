@@ -9,7 +9,7 @@ import {
 } from '../controllers/education.controller.js';
 import { createUpdateExperience, deleteExperience, getExperiences } from '../controllers/experience.controller.js';
 import { generate } from '../controllers/otp.controller.js';
-import { updateAvatarFile } from '../middlewares/media.middleware.js';
+// import { updateAvatarFile } from '../middlewares/media.middleware.js';
 import { ensureProfileUnlocked } from '../middlewares/profileLockStatus.middleware.js';
 
 const router = Router();
@@ -24,8 +24,9 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);
 router.get('/profile', authenticate, readProfile);
-router.post('/update-profile', authenticate, ensureProfileUnlocked, updateAvatarFile, updateProfile);
-router.patch('/update-avatar', authenticate, updateAvatarFile, updateAvatar);
+router.post('/update-profile', authenticate, ensureProfileUnlocked, updateProfile);
+// router.patch('/update-avatar', authenticate, updateAvatarFile, updateAvatar);
+router.patch('/update-avatar', authenticate, updateAvatar);
 
 router.get('/education', authenticate, getEducations);
 router.get('/education/nitap', authenticate, getEducationsAtNitap);
