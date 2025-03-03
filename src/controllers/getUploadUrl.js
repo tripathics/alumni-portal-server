@@ -17,6 +17,10 @@ export const getUploadUrl = async (req, res, next) => {
       throw new ApiError(400, 'Media', `Invalid media type: ${filetype}`);
     }
 
+    if (type === 'avatar' && filetype !== 'image/jpeg') {
+      throw new ApiError(400, 'Media', 'Only JPEG files are allowed for avatar');
+    }
+
     const extension = filetype.split('/')[1];
     let name = filename;
     if (type === 'avatar') {
