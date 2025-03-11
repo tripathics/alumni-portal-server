@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
     email varchar(50) NOT NULL UNIQUE,
     password varchar(100) NOT NULL,
     role text[] NOT NULL CHECK(role <@ ARRAY['admin', 'coordinator', 'alumni', 'user']) DEFAULT ARRAY['user'],
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS profiles (

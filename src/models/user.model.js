@@ -33,7 +33,7 @@ class User {
 
   static async findByEmailWithProfile(email) {
     const result = await db.query(`
-      SELECT users.*, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
+      SELECT users.*, users.updated_at, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
       EXISTS (
         SELECT 1 FROM membership_applications 
         WHERE users.id = membership_applications.user_id AND status = 'pending'
@@ -57,7 +57,7 @@ class User {
 
   static async updatePassword(email, password) {
     const result = await db.query(`
-      UPDATE users SET password = $1 WHERE email = $2 RETURNING *
+      UPDATE users SET password = $1, updated_at = NOW() WHERE email = $2 RETURNING *
     `, [password, email]);
     return result.rows[0];
   }
