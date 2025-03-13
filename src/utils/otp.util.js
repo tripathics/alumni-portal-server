@@ -165,6 +165,10 @@ export const verifyOTP = async (email, otp) => {
   if (!otpResult) {
     throw new Error('OTP: Email not found');
   }
+  // check attempts left
+  if (otpResult.attempts > MAX_ATTEMPTS) {
+    throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
+  }
   // check if otp is matched
   if (otpResult.otp === otp) {
     // Convert otpResult.updated_at to the server's timezone
@@ -185,8 +189,6 @@ export const verifyOTP = async (email, otp) => {
   }
   // increment the number of attempts
   const { attempts } = await OTP.incrementAttempts(email);
-  if (attempts > MAX_ATTEMPTS) {
-    throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
-  }
+
   throw new ApiError(400, 'OTP', `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
 };

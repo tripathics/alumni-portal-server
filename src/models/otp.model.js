@@ -27,7 +27,7 @@ class OTP {
   }
 
   static async findOTPByEmail(email) {
-    const otpResult = await db.query('SELECT * FROM otp_email WHERE email = $1', [email]);
+    const otpResult = await db.query('SELECT otp_email.*, otp_email_attempts.attempts FROM otp_email LEFT JOIN otp_email_attempts ON otp_email.email = otp_email_attempts.email WHERE otp_email.email = $1', [email]);
     return otpResult.rows[0];
   }
 
