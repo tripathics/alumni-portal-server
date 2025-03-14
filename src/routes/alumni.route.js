@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { updateSignFile } from '../middlewares/media.middleware.js';
+// import { updateSignFile } from '../middlewares/media.middleware.js';
 import {
   prefillMembershipForm, submitMembershipForm, getPastApplications, getApplication,
 } from '../controllers/alumni.controller.js';
@@ -8,7 +8,8 @@ import { ensureProfileUnlocked, profileLockStatus } from '../middlewares/profile
 const router = Router();
 
 router.get('/membership-prefill', profileLockStatus, prefillMembershipForm);
-router.post('/membership', ensureProfileUnlocked, updateSignFile, submitMembershipForm);
+// router.post('/membership', ensureProfileUnlocked, updateSignFile, submitMembershipForm);
+router.post('/membership', ensureProfileUnlocked, submitMembershipForm);
 
 router.get('/past-applications', getPastApplications);
 router.get('/past-applications/:id', getApplication);

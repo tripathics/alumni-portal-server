@@ -3,7 +3,7 @@ import { authenticate, authenticateAdmin } from '../middlewares/authenticate.mid
 import { errorHandler, notFoundErrorHandler } from '../middlewares/error.middleware.js';
 import userRoute from './user.route.js';
 import otpRoute from './otp.route.js';
-import mediaRoute from './media.route..js';
+import mediaRoute from './media.route.js';
 import alumniRoute from './alumni.route.js';
 import adminRoute from './admin.route.js';
 import { getUploadUrl } from '../controllers/getUploadUrl.js';

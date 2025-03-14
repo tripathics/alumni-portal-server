@@ -1,5 +1,6 @@
 import MembershipApplications from '../models/membershipApplication.model.js';
 import Profile from '../models/profile.model.js';
+import { createTimestampedSignUrl } from '../utils/media.util.js';
 
 export const prefillMembershipForm = async (req, res, next) => {
   if (req.profile_locked) {
@@ -17,21 +18,39 @@ export const prefillMembershipForm = async (req, res, next) => {
   }
 };
 
+// export const submitMembershipForm = async (req, res, next) => {
+//   const { tokenPayload, profile_locked: profileLocked, body: membershipFormData } = req;
+//   if (profileLocked) {
+//     return res.status(403).json({ message: 'Profile is locked' });
+//   }
+
+//   const sign = req.file?.filename;
+
+//   if (!sign) {
+//     return res.status(400).json({ message: 'Signature is required' });
+//   }
+//   try {
+//     const application = await MembershipApplications.create(tokenPayload.id, {
+//       ...membershipFormData, sign,
+//     });
+//     res.status(201).json({
+//       success: true,
+//       message: 'Application submitted successfully', application
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const submitMembershipForm = async (req, res, next) => {
-  const { tokenPayload, profile_locked: profileLocked, body: membershipFormData } = req;
-  if (profileLocked) {
-    return res.status(403).json({ message: 'Profile is locked' });
-  }
+  const { tokenPayload, body: membershipFormData } = req;
 
-  const sign = req.file?.filename;
-
-  if (!sign) {
+  if (!membershipFormData.sign) {
     return res.status(400).json({ message: 'Signature is required' });
   }
+  membershipFormData.sign = createTimestampedSignUrl(membershipFormData.sign);
   try {
-    const application = await MembershipApplications.create(tokenPayload.id, {
-      ...membershipFormData, sign,
-    });
+    const application = await MembershipApplications.create(tokenPayload.id, membershipFormData);
     res.status(201).json({ success: true, message: 'Application submitted successfully', application });
   } catch (error) {
     next(error);

@@ -4,7 +4,7 @@ import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
-import { getUpdatedAvatarUrl } from '../utils/media.util.js';
+import { createTimestampedAvatarUrl } from '../utils/media.util.js';
 
 export const validateSession = async (req, res) => {
   res.status(200).json({ message: 'Session is valid', success: true });
@@ -163,7 +163,7 @@ export const updateProfile = async (req, res, next) => {
 
     // TODO: delete existing avatar file if new avatar is uploaded
     const updatedProfile = await Profile.createOrUpdate(userId, {
-      ...profileData, avatar: getUpdatedAvatarUrl(profileData.avatar),
+      ...profileData, avatar: createTimestampedAvatarUrl(profileData.avatar),
     });
     res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
   } catch (error) {
@@ -177,7 +177,7 @@ export const updateAvatar = async (req, res, next) => {
     const { avatar } = req.body;
 
     // TODO: delete existing avatar file if new avatar is uploaded
-    const result = await Profile.updateAvatar(userId, getUpdatedAvatarUrl(avatar));
+    const result = await Profile.updateAvatar(userId, createTimestampedAvatarUrl(avatar));
     res.status(200).json({ success: true, result, message: 'Avatar updated' });
   } catch (error) {
     next(error);
