@@ -8,7 +8,6 @@ import { ensureProfileUnlocked, profileLockStatus } from '../middlewares/profile
 const router = Router();
 
 router.get('/membership-prefill', profileLockStatus, prefillMembershipForm);
-// router.post('/membership', ensureProfileUnlocked, updateSignFile, submitMembershipForm);
 router.post('/membership', ensureProfileUnlocked, submitMembershipForm);
 
 router.get('/past-applications', getPastApplications);

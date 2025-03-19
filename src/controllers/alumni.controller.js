@@ -4,7 +4,7 @@ import { createTimestampedSignUrl } from '../utils/media.util.js';
 
 export const prefillMembershipForm = async (req, res, next) => {
   if (req.profile_locked) {
-    return res.status(403).json({ message: 'Membership application is already pending for approval' });
+    return res.status(403).json({ message: 'Membership application is pending for approval' });
   }
   try {
     const profile = await Profile.findProfileWithEducationAtNITAP(req.tokenPayload.email);
@@ -17,30 +17,6 @@ export const prefillMembershipForm = async (req, res, next) => {
     next(error);
   }
 };
-
-// export const submitMembershipForm = async (req, res, next) => {
-//   const { tokenPayload, profile_locked: profileLocked, body: membershipFormData } = req;
-//   if (profileLocked) {
-//     return res.status(403).json({ message: 'Profile is locked' });
-//   }
-
-//   const sign = req.file?.filename;
-
-//   if (!sign) {
-//     return res.status(400).json({ message: 'Signature is required' });
-//   }
-//   try {
-//     const application = await MembershipApplications.create(tokenPayload.id, {
-//       ...membershipFormData, sign,
-//     });
-//     res.status(201).json({
-//       success: true,
-//       message: 'Application submitted successfully', application
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 export const submitMembershipForm = async (req, res, next) => {
   const { tokenPayload, body: membershipFormData } = req;
@@ -69,7 +45,7 @@ export const getPastApplications = async (req, res, next) => {
 };
 
 export const getApplication = async (req, res, next) => {
-  const { params: { id }, user: { id: userId } } = req;
+  const { params: { id }, tokenPayload: { id: userId } } = req;
   try {
     const application = await MembershipApplications.findById(id);
     if (application.user_id !== userId) {
