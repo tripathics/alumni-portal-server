@@ -1,4 +1,4 @@
-import { allowedCategories, allowedFileTypes, getSignedUploadUrl } from '../config/s3.config.js';
+import { uploadCategories, getSignedUploadUrl } from '../config/s3.config.js';
 import ApiError from '../utils/ApiError.util.js';
 
 export const getUploadUrl = async (req, res, next) => {
@@ -10,15 +10,16 @@ export const getUploadUrl = async (req, res, next) => {
       throw new ApiError(400, 'Media', 'filename, filetype and filesize are required');
     }
 
-    if (!allowedCategories.includes(type)) {
-      throw new ApiError(400, 'Media', `Invalid media category: ${type}`);
+    if (!uploadCategories[type]?.allowedTypes.includes(filetype)) {
+      const typeAllowed = uploadCategories[type];
+      throw new ApiError(400, 'Media', `Only ${typeAllowed.join(', ')} files are allowed for ${type}`);
     }
-    if (!allowedFileTypes.includes(filetype)) {
-      throw new ApiError(400, 'Media', `Invalid media type: ${filetype}`);
+    if (filesize > uploadCategories[type]?.maxSize) {
+      throw new ApiError(400, 'Media', `File size should be less than ${uploadCategories.avatar.maxSize / 1000000}MB`);
     }
 
-    if (type === 'avatar' && filetype !== 'image/jpeg') {
-      throw new ApiError(400, 'Media', 'Only JPEG files are allowed for avatar');
+    if (type === 'hero' && !req.tokenPayload.role.includes('admin')) {
+      throw new ApiError(403, 'Media', 'Only admin can upload hero images');
     }
 
     const extension = filetype.split('/')[1];

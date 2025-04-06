@@ -12,5 +12,9 @@ router.get('/avatar/:filename', (req, res) => {
   const { filename } = req.params;
   res.redirect(getS3Url(filename, 'avatar'));
 });
+router.get('/hero/:filename', (req, res) => {
+  const { filename } = req.params;
+  res.redirect(getS3Url(filename, 'hero'));
+});
 
 export default router;

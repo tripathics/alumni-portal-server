@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, authenticateAdmin } from '../middlewares/authenticate.middleware.js';
 import { errorHandler, notFoundErrorHandler } from '../middlewares/error.middleware.js';
 import userRoute from './user.route.js';
+import websiteContentRoute from './websiteContent.route.js';
 import otpRoute from './otp.route.js';
 import mediaRoute from './media.route.js';
 import alumniRoute from './alumni.route.js';
@@ -11,6 +12,7 @@ import { getUploadUrl } from '../controllers/getUploadUrl.js';
 const router = Router();
 
 router.use('/media', mediaRoute);
+router.use('/api/nitapalumnicontent', websiteContentRoute);
 router.use('/api/users', userRoute);
 router.use('/api/otp', otpRoute);
 router.get('/api/get-upload-url/:type', authenticate, getUploadUrl);

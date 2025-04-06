@@ -1,5 +1,6 @@
 import MembershipApplications from '../models/membershipApplication.model.js';
 import User from '../models/user.model.js';
+import HeroSection from '../models/heroSection.model.js';
 
 export const getMembershipApplications = async (req, res, next) => {
   try {
@@ -51,6 +52,21 @@ export const getUsers = async (req, res, next) => {
   try {
     const users = await User.findWithBasicProfile();
     res.status(200).json({ users });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// website content management
+export const updateHeroContent = async (req, res, next) => {
+  try {
+    const formData = req.body;
+    const result = HeroSection.update(formData);
+    if (result) {
+      res.status(200).json({ message: 'Hero section updated successfully' });
+    } else {
+      res.status(400).json({ message: 'Failed to update hero section' });
+    }
   } catch (err) {
     next(err);
   }

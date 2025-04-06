@@ -65,5 +65,27 @@ export const getSignedUploadUrl = async ({ filename, fileType, type = 'avatar' }
   return { url, key };
 };
 
-export const allowedCategories = ['avatar', 'sign', 'post'];
+export const allowedCategories = ['avatar', 'sign', 'post', 'hero'];
 export const allowedFileTypes = ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'];
+
+export const uploadCategoryMappings = {
+  avatar: ['image/jpeg'],
+  sign: ['image/jpeg'],
+  post: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
+  hero: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
+};
+
+export const uploadCategories = {
+  avatar: {
+    allowedTypes: ['image/jpeg'], maxSize: 2097152, // 2MB
+  },
+  sign: { allowedTypes: ['image/jpeg'], maxSize: Infinity },
+  post: {
+    allowedTypes: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
+    maxSize: Infinity,
+  },
+  hero: {
+    allowedTypes: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
+    maxSize: 3145728, // 3MB
+  },
+};

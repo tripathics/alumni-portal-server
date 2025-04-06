@@ -9,7 +9,6 @@ import {
 } from '../controllers/education.controller.js';
 import { createUpdateExperience, deleteExperience, getExperiences } from '../controllers/experience.controller.js';
 import { generate } from '../controllers/otp.controller.js';
-// import { updateAvatarFile } from '../middlewares/media.middleware.js';
 import { ensureProfileUnlocked } from '../middlewares/profileLockStatus.middleware.js';
 
 const router = Router();

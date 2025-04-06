@@ -87,6 +87,16 @@ CREATE TABLE IF NOT EXISTS otp_email_attempts (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- website content
+CREATE TABLE hero_section (
+    id SERIAL PRIMARY KEY,
+    title varchar(255) NOT NULL,
+    description text NOT NULL,
+    hero_image varchar(255) DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+ALTER TABLE hero_section ADD CONSTRAINT single_row CHECK (id = 1);
+
 CREATE TABLE IF NOT EXISTS web_director_message (
     director_name varchar(100) NOT NULL,
     director_message text NOT NULL,
