@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "prepare": "husky",
     "migrate": "node ./src/database/migrate.js",
     "migrate:down": "node ./src/database/migrate.js down"
@@ -37,10 +37,13 @@
   "devDependencies": {
     "@types/express": "^5.0.1",
     "@types/nodemailer": "^6.4.14",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-prettier": "^5.2.6",
     "husky": "^9.0.11",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "prettier": "^3.5.3"
   }
 }

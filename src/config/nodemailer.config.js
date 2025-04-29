@@ -20,7 +20,11 @@ export const verifyTransporterConnection = async () => {
   try {
     await transporter.verify();
   } catch (err) {
-    throw new ApiError(500, 'NODEMAILER', `SMTP connection failed: ${err.message}`);
+    throw new ApiError(
+      500,
+      'NODEMAILER',
+      `SMTP connection failed: ${err.message}`,
+    );
   }
 };
 

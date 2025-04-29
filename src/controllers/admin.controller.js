@@ -38,7 +38,7 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
       // add 'alumni' role to user
       const userRecord = await User.addRole(membershipApplicationRecord.user_id, 'alumni');
       if (userRecord.role.includes('alumni')) {
-        res.status(201).json({ message: 'Membership application status approved successfully', membershipApplicationRecord });
+        res.status(201).json({ message: 'Membership application approved successfully', membershipApplicationRecord });
       }
     } else {
       res.status(201).json({ message: 'Membership application rejected successfully', membershipApplicationRecord });
