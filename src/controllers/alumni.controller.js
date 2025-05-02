@@ -1,13 +1,19 @@
 import MembershipApplications from '../models/membershipApplication.model.js';
+import Alumni from '../models/alumni.model.js';
+
 import Profile from '../models/profile.model.js';
 import { createTimestampedSignUrl } from '../utils/media.util.js';
 
 export const prefillMembershipForm = async (req, res, next) => {
   if (req.profile_locked) {
-    return res.status(403).json({ message: 'Membership application is pending for approval' });
+    return res
+      .status(403)
+      .json({ message: 'Membership application is pending for approval' });
   }
   try {
-    const profile = await Profile.findProfileWithEducationAtNITAP(req.tokenPayload.email);
+    const profile = await Profile.findProfileWithEducationAtNITAP(
+      req.tokenPayload.email,
+    );
     if (!profile) {
       res.status(403).json({ message: 'Profile is incomplete' });
     } else {
@@ -18,6 +24,16 @@ export const prefillMembershipForm = async (req, res, next) => {
   }
 };
 
+export const getAlumni = async (req, res) => {
+  // name, avatar, course, degree, linkedin?, github?
+  // current status?
+  //   - job (role@company, location) or
+  //   - education (course, degree @ college)
+
+  const result = await Alumni.find();
+  res.json(result);
+};
+
 export const submitMembershipForm = async (req, res, next) => {
   const { tokenPayload, body: membershipFormData } = req;
 
@@ -26,8 +42,15 @@ export const submitMembershipForm = async (req, res, next) => {
   }
   membershipFormData.sign = createTimestampedSignUrl(membershipFormData.sign);
   try {
-    const application = await MembershipApplications.create(tokenPayload.id, membershipFormData);
-    res.status(201).json({ success: true, message: 'Application submitted successfully', application });
+    const application = await MembershipApplications.create(
+      tokenPayload.id,
+      membershipFormData,
+    );
+    res.status(201).json({
+      success: true,
+      message: 'Application submitted successfully',
+      application,
+    });
   } catch (error) {
     next(error);
   }
@@ -45,7 +68,10 @@ export const getPastApplications = async (req, res, next) => {
 };
 
 export const getApplication = async (req, res, next) => {
-  const { params: { id }, tokenPayload: { id: userId } } = req;
+  const {
+    params: { id },
+    tokenPayload: { id: userId },
+  } = req;
   try {
     const application = await MembershipApplications.findById(id);
     if (application.user_id !== userId) {

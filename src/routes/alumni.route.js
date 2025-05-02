@@ -1,9 +1,15 @@
 import { Router } from 'express';
 // import { updateSignFile } from '../middlewares/media.middleware.js';
 import {
-  prefillMembershipForm, submitMembershipForm, getPastApplications, getApplication,
+  prefillMembershipForm,
+  submitMembershipForm,
+  getPastApplications,
+  getApplication,
 } from '../controllers/alumni.controller.js';
-import { ensureProfileUnlocked, profileLockStatus } from '../middlewares/profileLockStatus.middleware.js';
+import {
+  ensureProfileUnlocked,
+  profileLockStatus,
+} from '../middlewares/profileLockStatus.middleware.js';
 
 const router = Router();
 
