@@ -24,14 +24,16 @@ export const prefillMembershipForm = async (req, res, next) => {
   }
 };
 
-export const getAlumni = async (req, res) => {
-  // name, avatar, course, degree, linkedin?, github?
-  // current status?
-  //   - job (role@company, location) or
-  //   - education (course, degree @ college)
-
-  const result = await Alumni.find();
-  res.json(result);
+/**
+ * Public API to GET alumni list
+ */
+export const getAlumni = async (req, res, next) => {
+  try {
+    const result = await Alumni.find();
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const submitMembershipForm = async (req, res, next) => {
