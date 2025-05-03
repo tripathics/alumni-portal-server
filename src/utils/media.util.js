@@ -15,10 +15,13 @@ const deleteFile = async (filename, type) => {
   }
 };
 
-export const createTimestampedAvatarUrl = (filename) => `${filename}?updated_at=${new Date().getTime()}}`;
+export const createTimestampedAvatarUrl = (filename) =>
+  `${filename}?updated_at=${new Date().getTime()}}`;
 
-export const createTimestampedSignUrl = (filename) => `${filename}?updated_at=${new Date().getTime()}}`;
+export const createTimestampedSignUrl = (filename) =>
+  `${filename}?updated_at=${new Date().getTime()}}`;
 
-export const getS3Url = (filename, type) => `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${type}/${filename}`;
+export const getS3Url = (filename, type) =>
+  `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${type}/${filename}`;
 
 export default deleteFile;

@@ -2,7 +2,9 @@ import Profile from '../models/profile.model.js';
 import ApiError from '../utils/ApiError.util.js';
 
 export const profileLockStatus = async (req, res, next) => {
-  const { tokenPayload: { id: userId } } = req;
+  const {
+    tokenPayload: { id: userId },
+  } = req;
   try {
     const profileLocked = await Profile.profileStatus(userId);
     req.profile_locked = profileLocked;

@@ -1,15 +1,14 @@
 import {
-  S3, HeadBucketCommand, CreateBucketCommand, PutObjectCommand,
+  S3,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import ApiError from '../utils/ApiError.util.js';
 
-const {
-  AWS_S3_BUCKET,
-  AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY,
-  AWS_REGION,
-} = process.env;
+const { AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION } =
+  process.env;
 
 export const s3 = new S3({
   region: AWS_REGION,
@@ -48,7 +47,11 @@ export const createBucketIfNotExists = async (bucketName) => {
  * @returns {Promise<{url: string, key: string}>} An object with the signed URL and the S3 key.
  * @throws {ApiError} If the filename or fileType is not provided.
  */
-export const getSignedUploadUrl = async ({ filename, fileType, type = 'avatar' }) => {
+export const getSignedUploadUrl = async ({
+  filename,
+  fileType,
+  type = 'avatar',
+}) => {
   if (!filename || !fileType) {
     throw new ApiError(400, 'S3', 'Filename and fileType are required.');
   }
@@ -56,17 +59,25 @@ export const getSignedUploadUrl = async ({ filename, fileType, type = 'avatar' }
   const key = `${type}/${filename}`;
   const contentType = fileType;
 
-  const url = await getSignedUrl(s3, new PutObjectCommand({
-    Bucket: AWS_S3_BUCKET,
-    Key: key,
-    ContentType: contentType,
-  }));
+  const url = await getSignedUrl(
+    s3,
+    new PutObjectCommand({
+      Bucket: AWS_S3_BUCKET,
+      Key: key,
+      ContentType: contentType,
+    }),
+  );
 
   return { url, key };
 };
 
 export const allowedCategories = ['avatar', 'sign', 'post', 'hero'];
-export const allowedFileTypes = ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'];
+export const allowedFileTypes = [
+  'image/webp',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+];
 
 export const uploadCategoryMappings = {
   avatar: ['image/jpeg'],
@@ -77,7 +88,8 @@ export const uploadCategoryMappings = {
 
 export const uploadCategories = {
   avatar: {
-    allowedTypes: ['image/jpeg'], maxSize: 2097152, // 2MB
+    allowedTypes: ['image/jpeg'],
+    maxSize: 2097152, // 2MB
   },
   sign: { allowedTypes: ['image/jpeg'], maxSize: Infinity },
   post: {

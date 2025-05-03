@@ -9,7 +9,10 @@ import url from 'url';
 import bcrypt from 'bcrypt';
 import pg from 'pg';
 
-const pgUrl = process.env.NODE_ENV === 'production' ? process.env.PGURL : process.env.PGURL_DEV;
+const pgUrl =
+  process.env.NODE_ENV === 'production'
+    ? process.env.PGURL
+    : process.env.PGURL_DEV;
 
 const pool = new pg.Pool({
   connectionString: pgUrl,
@@ -24,20 +27,28 @@ const seedAdmin = async (client) => {
     process.env.ADMIN_PASSWORD,
   ];
   // create user
-  const { rowCount } = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+  const { rowCount } = await client.query(
+    'SELECT * FROM users WHERE email = $1',
+    [email],
+  );
   if (rowCount) {
     console.log('Admin user already seeded');
     return;
   }
   const hashedPassword = await bcrypt.hash(password, 10);
-  await client.query('INSERT INTO users (email, password, role) VALUES ($1, $2, ARRAY[$3])', [email, hashedPassword, 'admin']);
+  await client.query(
+    'INSERT INTO users (email, password, role) VALUES ($1, $2, ARRAY[$3])',
+    [email, hashedPassword, 'admin'],
+  );
   console.log('Admin user seeded');
 };
 
 const migrate = async () => {
   const client = await pool.connect();
   try {
-    const sql = (await fs.promises.readFile(path.join(DIRNAME, './database.sql'))).toString();
+    const sql = (
+      await fs.promises.readFile(path.join(DIRNAME, './database.sql'))
+    ).toString();
     await client.query(sql);
 
     // seed admin user

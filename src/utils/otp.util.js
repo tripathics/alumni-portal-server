@@ -139,17 +139,25 @@ NIT Arunachal Pradesh
 };
 
 export const generateOTP = async (email) => {
-  const otp = Math.floor(Math.random() * 10e5).toString().padEnd(6, '0');
+  const otp = Math.floor(Math.random() * 10e5)
+    .toString()
+    .padEnd(6, '0');
 
   // check if attempts less than 3 and last attempt is more than 24 hours ago
   const attempt = await OTP.findAttemptByEmail(email);
   if (attempt && attempt.attempts > MAX_ATTEMPTS) {
     // Convert otpResult.updated_at to the server's timezone
     const updatedAtLocal = new Date(attempt.updated_at);
-    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    updatedAtLocal.setMinutes(
+      updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
+    );
     // if last attempt is less than 24 hours ago
     if (new Date() - updatedAtLocal < 24 * 60 * 60 * 1000) {
-      throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
+      throw new ApiError(
+        400,
+        'OTP',
+        'Max limit reached for today. Please try again after 24 hrs.',
+      );
     }
     // reset the attempts to 0
     await OTP.resetAttempts(email);
@@ -167,13 +175,19 @@ export const verifyOTP = async (email, otp) => {
   }
   // check attempts left
   if (otpResult.attempts > MAX_ATTEMPTS) {
-    throw new ApiError(400, 'OTP', 'Max limit reached for today. Please try again after 24 hrs.');
+    throw new ApiError(
+      400,
+      'OTP',
+      'Max limit reached for today. Please try again after 24 hrs.',
+    );
   }
   // check if otp is matched
   if (otpResult.otp === otp) {
     // Convert otpResult.updated_at to the server's timezone
     const updatedAtLocal = new Date(otpResult.updated_at);
-    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    updatedAtLocal.setMinutes(
+      updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
+    );
     // otp expired
     if (new Date() - updatedAtLocal > 5 * 60 * 1000) {
       // const otpDeleteResult = await OTP.deleteOTP(email);  // delete expired otp
@@ -190,5 +204,9 @@ export const verifyOTP = async (email, otp) => {
   // increment the number of attempts
   const { attempts } = await OTP.incrementAttempts(email);
 
-  throw new ApiError(400, 'OTP', `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`);
+  throw new ApiError(
+    400,
+    'OTP',
+    `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`,
+  );
 };

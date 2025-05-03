@@ -1,7 +1,8 @@
 import ApiError from '../utils/ApiError.util.js';
 import { generateOTP, sendOTPEmail, verifyOTP } from '../utils/otp.util.js';
 
-const emailRegex = /^(?!.*@nitap\.ac\.in)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const emailRegex =
+  /^(?!.*@nitap\.ac\.in)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 const generate = async (req, res, next) => {
   const { email } = req.body;

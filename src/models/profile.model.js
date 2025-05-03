@@ -29,7 +29,8 @@ const profileColumns = [
 
 class Profile {
   static async findByEmail(email) {
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT users.email, users.role, 
       profiles.*,
       EXISTS (
@@ -40,13 +41,16 @@ class Profile {
       RIGHT JOIN users ON users.id = profiles.user_id
       LEFT JOIN membership_applications ON users.id = membership_applications.user_id
       WHERE users.email = $1
-    `, [email]);
+    `,
+      [email],
+    );
 
     return result.rows[0];
   }
 
   static async findProfileWithEducationAtNITAP(email) {
-    const result = await db.query(`
+    const result = await db.query(
+      `
     SELECT users.email, profiles.*, 
     educations.degree, educations.discipline, educations.start_date as enrollment_date, educations.end_date as graduation_date,
     EXISTS (
@@ -57,13 +61,16 @@ class Profile {
     LEFT JOIN users ON users.id = profiles.user_id
     LEFT JOIN membership_applications ON users.id = membership_applications.user_id
     WHERE users.email = $1 AND educations.institute = $2
-    `, [email, NITAP]);
+    `,
+      [email, NITAP],
+    );
 
     return result.rows[0];
   }
 
   static async findProfileCompletionStatus(email) {
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
     SELECT EXISTS (
       SELECT avatar FROM profiles WHERE user_id = users.id
     ) as "avatar",
@@ -78,13 +85,17 @@ class Profile {
       SELECT institute FROM educations
       WHERE users.id = educations.user_id AND educations.institute=$1
     ) as "education" FROM users where email=$2
-    `, [NITAP, email]);
+    `,
+      [NITAP, email],
+    );
 
     return rows[0];
   }
 
   static async createOrUpdate(userId, profileData) {
-    const columns = profileColumns.filter((column) => profileData[column] !== undefined && column !== 'user_id');
+    const columns = profileColumns.filter(
+      (column) => profileData[column] !== undefined && column !== 'user_id',
+    );
     const values = [userId, ...columns.map((column) => profileData[column])];
 
     const sql = `
@@ -99,23 +110,29 @@ class Profile {
   }
 
   static async updateAvatar(userId, avatar) {
-    const result = await db.query(`
+    const result = await db.query(
+      `
       UPDATE profiles
       SET avatar = $1
       WHERE "user_id" = $2
       RETURNING *
-    `, [avatar, userId]);
+    `,
+      [avatar, userId],
+    );
 
     return result.rows[0];
   }
 
   static async profileStatus(userId) {
-    const user = await db.query(`
+    const user = await db.query(
+      `
       SELECT EXISTS (
         SELECT 1 FROM membership_applications 
         WHERE user_id = $1 AND status = 'pending'
       ) as "profile_locked"
-    `, [userId]);
+    `,
+      [userId],
+    );
 
     return !!user.rows[0].profile_locked;
   }

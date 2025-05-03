@@ -3,7 +3,10 @@ import NITAP from '../utils/constants.util.js';
 
 class MembershipApplications {
   static async verifyUserSign(userId, sign) {
-    const { rowCount } = await db.query('SELECT * FROM membership_applications WHERE user_id = $1 AND sign = $2', [userId, sign]);
+    const { rowCount } = await db.query(
+      'SELECT * FROM membership_applications WHERE user_id = $1 AND sign = $2',
+      [userId, sign],
+    );
     return rowCount > 0;
   }
 
@@ -34,7 +37,8 @@ class MembershipApplications {
   }
 
   static async findById(id) {
-    const { rows } = await db.query(`
+    const { rows } = await db.query(
+      `
     SELECT membership_applications.*,
     profiles.*,
     users.email,
@@ -44,7 +48,9 @@ class MembershipApplications {
     LEFT JOIN profiles ON membership_applications.user_id = profiles.user_id
     LEFT JOIN educations ON membership_applications.user_id = educations.user_id
     WHERE educations.institute = '${NITAP}'
-    AND membership_applications.id = $1`, [id]);
+    AND membership_applications.id = $1`,
+      [id],
+    );
 
     return rows[0];
   }

@@ -32,10 +32,16 @@ export const createUpdateEducation = async (req, res, next) => {
 };
 
 export const deleteEducation = async (req, res, next) => {
-  const { tokenPayload, query: { id } } = req;
+  const {
+    tokenPayload,
+    query: { id },
+  } = req;
   try {
     const educationRecord = await Educations.findById(id);
-    if (educationRecord.user_id !== tokenPayload.id && !tokenPayload.role.includes('admin')) {
+    if (
+      educationRecord.user_id !== tokenPayload.id &&
+      !tokenPayload.role.includes('admin')
+    ) {
       throw new ApiError(403, 'Unauthorized');
     }
     await Educations.delete(id);

@@ -16,7 +16,8 @@ export const getMembershipApplications = async (req, res, next) => {
 export const getMembershipApplicationById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const membershipApplicationRecord = await MembershipApplications.findById(id);
+    const membershipApplicationRecord =
+      await MembershipApplications.findById(id);
     res.json(membershipApplicationRecord);
   } catch (err) {
     next(err);
@@ -25,23 +26,39 @@ export const getMembershipApplicationById = async (req, res, next) => {
 
 export const updateMembershipApplicationStatus = async (req, res, next) => {
   try {
-    const { body: { status }, params: { id } } = req;
+    const {
+      body: { status },
+      params: { id },
+    } = req;
 
     // if current status is !pending, return error
-    const existingMembershipApplicationRecord = await MembershipApplications.findById(id);
+    const existingMembershipApplicationRecord =
+      await MembershipApplications.findById(id);
     if (existingMembershipApplicationRecord.status !== 'pending') {
-      return res.status(400).json({ message: 'Cannot update status of resolved/rejected application' });
+      return res.status(400).json({
+        message: 'Cannot update status of resolved/rejected application',
+      });
     }
 
-    const membershipApplicationRecord = await MembershipApplications.updateStatus(id, status);
+    const membershipApplicationRecord =
+      await MembershipApplications.updateStatus(id, status);
     if (membershipApplicationRecord.status === 'approved') {
       // add 'alumni' role to user
-      const userRecord = await User.addRole(membershipApplicationRecord.user_id, 'alumni');
+      const userRecord = await User.addRole(
+        membershipApplicationRecord.user_id,
+        'alumni',
+      );
       if (userRecord.role.includes('alumni')) {
-        res.status(201).json({ message: 'Membership application approved successfully', membershipApplicationRecord });
+        res.status(201).json({
+          message: 'Membership application approved successfully',
+          membershipApplicationRecord,
+        });
       }
     } else {
-      res.status(201).json({ message: 'Membership application rejected successfully', membershipApplicationRecord });
+      res.status(201).json({
+        message: 'Membership application rejected successfully',
+        membershipApplicationRecord,
+      });
     }
   } catch (err) {
     next(err);

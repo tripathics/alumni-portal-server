@@ -15,7 +15,9 @@ const experienceColumns = [
 
 class Experiences {
   static async createOrUpdate(userId, experienceData) {
-    const columns = experienceColumns.filter((column) => !!experienceData[column] && column !== 'user_id');
+    const columns = experienceColumns.filter(
+      (column) => !!experienceData[column] && column !== 'user_id',
+    );
     const values = [userId, ...columns.map((column) => experienceData[column])];
 
     const sql = `
@@ -30,12 +32,18 @@ class Experiences {
   }
 
   static async findByUserId(userId) {
-    const result = await db.query('SELECT * FROM experiences WHERE user_id = $1', [userId]);
+    const result = await db.query(
+      'SELECT * FROM experiences WHERE user_id = $1',
+      [userId],
+    );
     return result.rows;
   }
 
   static async delete(id) {
-    const result = await db.query('DELETE FROM experiences WHERE id = $1 RETURNING *', [id]);
+    const result = await db.query(
+      'DELETE FROM experiences WHERE id = $1 RETURNING *',
+      [id],
+    );
     return result.rowCount > 0;
   }
 }

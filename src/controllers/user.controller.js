@@ -54,9 +54,13 @@ export const register = async (req, res, next) => {
     }
     // check if otp verified is expired
     const updatedAtLocal = new Date(otpRecord.updated_at);
-    updatedAtLocal.setMinutes(updatedAtLocal.getMinutes() - new Date().getTimezoneOffset());
+    updatedAtLocal.setMinutes(
+      updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
+    );
     if (new Date() - updatedAtLocal > 5 * 60 * 1000) {
-      return res.status(400).json({ message: 'Session expired, please retry the signup process' });
+      return res
+        .status(400)
+        .json({ message: 'Session expired, please retry the signup process' });
     }
 
     // hash password and create user
@@ -95,10 +99,17 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const userProfileRecord = await User.findByEmailWithProfile(email);
     if (!userProfileRecord) {
-      throw new ApiError(401, 'User', 'User does not exist with this email. Please register first.');
+      throw new ApiError(
+        401,
+        'User',
+        'User does not exist with this email. Please register first.',
+      );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, userProfileRecord.password);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      userProfileRecord.password,
+    );
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -106,7 +117,9 @@ export const login = async (req, res, next) => {
     const secretToken = generateToken(userProfileRecord);
 
     res.cookie('auth', secretToken, { httpOnly: true }).json({
-      message: 'User logged in', user: userProfileRecord, success: true,
+      message: 'User logged in',
+      user: userProfileRecord,
+      success: true,
     });
   } catch (error) {
     next(error);
@@ -122,7 +135,9 @@ export const readUser = async (req, res, next) => {
     }
 
     delete userProfileRecord.password;
-    res.status(200).json({ user: userProfileRecord, message: 'User found', success: true });
+    res
+      .status(200)
+      .json({ user: userProfileRecord, message: 'User found', success: true });
   } catch (error) {
     next(error);
   }
@@ -139,7 +154,9 @@ export const readProfile = async (req, res, next) => {
     if (!profileRecord) {
       return res.status(404).json({ message: 'Profile not found' });
     }
-    res.status(200).json({ user: profileRecord, message: 'Profile found', success: true });
+    res
+      .status(200)
+      .json({ user: profileRecord, message: 'Profile found', success: true });
   } catch (error) {
     next(error);
   }
@@ -148,8 +165,13 @@ export const readProfile = async (req, res, next) => {
 export const getProfileCompletionStatus = async (req, res, next) => {
   try {
     const { email } = req.tokenPayload;
-    const profileCompletionStatus = await Profile.findProfileCompletionStatus(email);
-    res.status(200).json({ profileCompletionStatus, message: 'Profile completion status', success: true });
+    const profileCompletionStatus =
+      await Profile.findProfileCompletionStatus(email);
+    res.status(200).json({
+      profileCompletionStatus,
+      message: 'Profile completion status',
+      success: true,
+    });
   } catch (error) {
     next(error);
   }
@@ -163,9 +185,12 @@ export const updateProfile = async (req, res, next) => {
 
     // TODO: delete existing avatar file if new avatar is uploaded
     const updatedProfile = await Profile.createOrUpdate(userId, {
-      ...profileData, avatar: createTimestampedAvatarUrl(profileData.avatar),
+      ...profileData,
+      avatar: createTimestampedAvatarUrl(profileData.avatar),
     });
-    res.status(200).json({ success: true, updatedProfile, message: 'Profile updated' });
+    res
+      .status(200)
+      .json({ success: true, updatedProfile, message: 'Profile updated' });
   } catch (error) {
     next(error);
   }
@@ -177,7 +202,10 @@ export const updateAvatar = async (req, res, next) => {
     const { avatar } = req.body;
 
     // TODO: delete existing avatar file if new avatar is uploaded
-    const result = await Profile.updateAvatar(userId, createTimestampedAvatarUrl(avatar));
+    const result = await Profile.updateAvatar(
+      userId,
+      createTimestampedAvatarUrl(avatar),
+    );
     res.status(200).json({ success: true, result, message: 'Avatar updated' });
   } catch (error) {
     next(error);

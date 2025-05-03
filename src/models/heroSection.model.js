@@ -19,7 +19,8 @@ class HeroSection {
     if (requiredCols.some((col) => !data[col])) {
       throw new ApiError(400, 'DB', 'Missing required fields');
     }
-    const result = await db.query(`
+    const result = await db.query(
+      `
       INSERT INTO hero_section (id, title, description, hero_image)
       VALUES (1, $1, $2, $3)
       ON CONFLICT (id) 
@@ -29,7 +30,9 @@ class HeroSection {
       hero_image = EXCLUDED.hero_image
       WHERE hero_section.id = 1
       RETURNING *
-    `, [data.title, data.description, data.hero_image]);
+    `,
+      [data.title, data.description, data.hero_image],
+    );
 
     return result.rows[0];
   }

@@ -22,10 +22,16 @@ export const createUpdateExperience = async (req, res, next) => {
 };
 
 export const deleteExperience = async (req, res, next) => {
-  const { tokenPayload, query: { id } } = req;
+  const {
+    tokenPayload,
+    query: { id },
+  } = req;
   try {
     const experienceRecord = await Experiences.findById(id);
-    if (experienceRecord.user_id !== tokenPayload.id && !tokenPayload.role.includes('admin')) {
+    if (
+      experienceRecord.user_id !== tokenPayload.id &&
+      !tokenPayload.role.includes('admin')
+    ) {
       throw new ApiError(403, 'Unauthorized');
     }
     await Experiences.delete(id);

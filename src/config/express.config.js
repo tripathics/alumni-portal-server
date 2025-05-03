@@ -14,13 +14,15 @@ logger.stream = {
 };
 app.use(morgan('dev', { stream: logger.stream }));
 
-if (process.env.NODE_ENV === 'development') {
-  app.use(cors({
-    origin: (origin, callback) => {
-      callback(null, true);
-    },
-    credentials: true,
-  }));
+if (process.env.NODE_ENV === 'evelopment') {
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        callback(null, true);
+      },
+      credentials: true,
+    }),
+  );
 } else if (process.env.NODE_ENV === 'production') {
   app.use(express.static(CLIENT_DIR));
 }
