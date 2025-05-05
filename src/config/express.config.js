@@ -14,7 +14,7 @@ logger.stream = {
 };
 app.use(morgan('dev', { stream: logger.stream }));
 
-if (process.env.NODE_ENV === 'evelopment') {
+if (process.env.NODE_ENV === 'development') {
   app.use(
     cors({
       origin: (origin, callback) => {
