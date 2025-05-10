@@ -15,7 +15,7 @@ export const getUploadUrl = async (req, res, next) => {
     }
 
     if (!uploadCategories[type]?.allowedTypes.includes(filetype)) {
-      const typeAllowed = uploadCategories[type];
+      const typeAllowed = uploadCategories[type].allowedTypes;
       throw new ApiError(
         400,
         'Media',

@@ -42,7 +42,7 @@ export const deleteEducation = async (req, res, next) => {
       educationRecord.user_id !== tokenPayload.id &&
       !tokenPayload.role.includes('admin')
     ) {
-      throw new ApiError(403, 'Unauthorized');
+      throw new ApiError(403, '', 'Unauthorized');
     }
     await Educations.delete(id);
     res.status(200).json({ success: true, message: 'Education deleted' });

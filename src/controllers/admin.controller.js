@@ -65,6 +65,7 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
   }
 };
 
+// user management
 export const getUsers = async (req, res, next) => {
   try {
     const users = await User.findWithBasicProfile();
@@ -72,6 +73,29 @@ export const getUsers = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const changeUserPassword = async (req, res) => {
+  res.json({ message: 'TODO', payload: req.body });
+};
+
+export const deleteUserAccount = async (req, res, next) => {
+  const { userId } = req.body;
+  try {
+    const result = await User.delete(userId);
+
+    res.json({ deleted: result, message: 'Account deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const assignUserRoles = async (req, res) => {
+  res.json({ message: 'TODO', payload: req.body });
+};
+
+export const revokeUserRoles = async (req, res) => {
+  res.json({ message: 'TODO', payload: req.body });
 };
 
 // website content management
