@@ -8,7 +8,8 @@ class User {
 
   static async findWithBasicProfile() {
     const { rows } = await db.query(`
-    SELECT users.id, users.email, users.role, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar
+    SELECT users.*, 
+    profiles.title, profiles.first_name, profiles.last_name, profiles.avatar
     FROM users LEFT JOIN profiles ON users.id = profiles.user_id`);
     return rows;
   }
@@ -39,7 +40,7 @@ class User {
   static async findByEmailWithProfile(email) {
     const result = await db.query(
       `
-      SELECT users.*, users.updated_at, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
+      SELECT users.*, profiles.title, profiles.first_name, profiles.last_name, profiles.avatar, profiles.sign,
       EXISTS (
         SELECT 1 FROM membership_applications 
         WHERE users.id = membership_applications.user_id AND status = 'pending'

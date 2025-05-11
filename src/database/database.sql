@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     city varchar(64) NOT NULL,
     country  varchar(64) NOT NULL,
 
-    phone varchar(15), 
+    phone varchar(15) NOT NULL, 
     alt_phone varchar(15),
     alt_email varchar(255),
     linkedin varchar(50),

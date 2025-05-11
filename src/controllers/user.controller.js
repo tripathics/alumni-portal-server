@@ -7,7 +7,11 @@ import ApiError from '../utils/ApiError.util.js';
 import { createTimestampedAvatarUrl } from '../utils/media.util.js';
 
 export const validateSession = async (req, res) => {
-  res.status(200).json({ message: 'Session is valid', success: true });
+  res.status(200).json({
+    message: 'Session is valid',
+    decoded: req.tokenPayload,
+    success: true,
+  });
 };
 
 export const checkEmailNotExists = async (req, res, next) => {
