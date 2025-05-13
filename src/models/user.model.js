@@ -1,4 +1,5 @@
 import * as db from '../config/db.config.js';
+import ApiError from '../utils/ApiError.util.js';
 
 class User {
   static async find() {
@@ -77,29 +78,32 @@ class User {
     return result.rows[0];
   }
 
-  static async addRole(id, role) {
+  static async addRoles(id, roles) {
     const { rows: userRecords } = await db.query(
       'SELECT * FROM users WHERE id = $1',
       [id],
     );
-    if (userRecords[0].role.includes(role)) return userRecords[0];
-    const { rows: updatedUserRecords } = await db.query(
-      `
-      UPDATE users SET role = array_append(role, $1) WHERE id = $2 RETURNING *
-    `,
-      [role, id],
-    );
+
+    const currentRoles = userRecords[0].role;
+    const newRoles = roles.filter((role) => !currentRoles.includes(role));
+
+    if (newRoles.length === 0) return userRecords[0];
+
+    const placeholders = newRoles.map((_, i) => `$${i + 1}`).join(', ');
+    const queryString = `
+      UPDATE users SET role = array_cat(role, ARRAY[${placeholders}]) 
+      WHERE id = $${newRoles.length + 1} RETURNING *
+    `;
+    const { rows: updatedUserRecords } = await db.query(queryString, [
+      ...newRoles,
+      id,
+    ]);
     return updatedUserRecords[0];
   }
 
-  static async removeRole(id, role) {
-    const { rows } = await db.query(
-      `
-      UPDATE users SET role = array_remove(role, $1) WHERE id = $2 RETURNING *
-    `,
-      [role, id],
-    );
-    return rows[0];
+  static async removeRoles(id, roles) {
+    console.log(id, roles);
+    throw new ApiError(500, 'DB', 'TODO: Implete remove roles');
   }
 
   static async delete(id) {

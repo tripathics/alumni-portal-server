@@ -44,9 +44,9 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
       await MembershipApplications.updateStatus(id, status);
     if (membershipApplicationRecord.status === 'approved') {
       // add 'alumni' role to user
-      const userRecord = await User.addRole(
+      const userRecord = await User.addRoles(
         membershipApplicationRecord.user_id,
-        'alumni',
+        ['alumni'],
       );
       if (userRecord.role.includes('alumni')) {
         res.status(201).json({
@@ -90,12 +90,24 @@ export const deleteUserAccount = async (req, res, next) => {
   }
 };
 
-export const assignUserRoles = async (req, res) => {
-  res.json({ message: 'TODO', payload: req.body });
+export const assignUserRoles = async (req, res, next) => {
+  try {
+    const { userId, roles } = req.body;
+    const result = await User.addRoles(userId, roles);
+    res.json({ message: 'Role(s) assgined successfully', updatedUser: result });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const revokeUserRoles = async (req, res) => {
-  res.json({ message: 'TODO', payload: req.body });
+export const revokeUserRoles = async (req, res, next) => {
+  try {
+    const { userId, roles } = req.body;
+    const result = await User.removeRoles(userId, roles);
+    res.json({ message: 'Role(s) revoked successfully', updatedUser: result });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // website content management
