@@ -1,4 +1,4 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 import NITAP from '../utils/constants.util.js';
 
 const profileColumns = [
@@ -27,9 +27,27 @@ const profileColumns = [
   'avatar',
 ];
 
-class Profile {
-  static async findByEmail(email) {
-    const result = await db.query(
+class Profile extends Model {
+  async findByUserId(userId) {
+    const { rows } = await this.queryExecutor.query(
+      `
+      SELECT users.email, users.role, profiles.*,
+      EXISTS (
+        SELECT 1 FROM membership_applications 
+        WHERE users.id = membership_applications.user_id AND status = 'pending'
+      ) as "profile_locked"
+      FROM profiles
+      RIGHT JOIN users ON users.id = profiles.user_id
+      LEFT JOIN membership_applications ON users.id = membership_applications.user_id
+      WHERE users.id = $1
+    `,
+      [userId],
+    );
+    return rows[0];
+  }
+
+  async findByEmail(email) {
+    const result = await this.queryExecutor.query(
       `
       SELECT users.email, users.role, 
       profiles.*,
@@ -48,8 +66,8 @@ class Profile {
     return result.rows[0];
   }
 
-  static async findProfileWithEducationAtNITAP(email) {
-    const result = await db.query(
+  async findProfileWithEducationAtNITAP(email) {
+    const result = await this.queryExecutor.query(
       `
     SELECT users.email, profiles.*, 
     educations.degree, educations.discipline, educations.start_date as enrollment_date, educations.end_date as graduation_date,
@@ -68,8 +86,8 @@ class Profile {
     return result.rows[0];
   }
 
-  static async findProfileCompletionStatus(email) {
-    const { rows } = await db.query(
+  async findProfileCompletionStatus(email) {
+    const { rows } = await this.queryExecutor.query(
       `
     SELECT EXISTS (
       SELECT avatar FROM profiles WHERE user_id = users.id
@@ -92,7 +110,7 @@ class Profile {
     return rows[0];
   }
 
-  static async createOrUpdate(userId, profileData) {
+  async createOrUpdate(userId, profileData) {
     const columns = profileColumns.filter(
       (column) => profileData[column] !== undefined && column !== 'user_id',
     );
@@ -105,12 +123,12 @@ class Profile {
       ${columns.map((column) => `${column} = EXCLUDED.${column}`).join(', ')}
       RETURNING *
     `;
-    const result = await db.query(sql, values);
+    const result = await this.queryExecutor.query(sql, values);
     return result.rows[0];
   }
 
-  static async updateAvatar(userId, avatar) {
-    const result = await db.query(
+  async updateAvatar(userId, avatar) {
+    const result = await this.queryExecutor.query(
       `
       UPDATE profiles
       SET avatar = $1
@@ -123,8 +141,8 @@ class Profile {
     return result.rows[0];
   }
 
-  static async profileStatus(userId) {
-    const user = await db.query(
+  async profileStatus(userId) {
+    const user = await this.queryExecutor.query(
       `
       SELECT EXISTS (
         SELECT 1 FROM membership_applications 

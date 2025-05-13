@@ -1,4 +1,4 @@
-import { uploadCategories, getSignedUploadUrl } from '../config/s3.config.js';
+import { getSignedUploadUrl, uploadCategories } from '../utils/s3.util.js';
 import ApiError from '../utils/ApiError.util.js';
 
 export const getUploadUrl = async (req, res, next) => {
@@ -58,3 +58,5 @@ export const getUploadUrl = async (req, res, next) => {
     next(err);
   }
 };
+
+export const deleteObject = () => {};

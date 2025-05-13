@@ -144,7 +144,7 @@ export const generateOTP = async (email) => {
     .padEnd(6, '0');
 
   // check if attempts less than 3 and last attempt is more than 24 hours ago
-  const attempt = await OTP.findAttemptByEmail(email);
+  const attempt = await new OTP().findAttemptByEmail(email);
   if (attempt && attempt.attempts > MAX_ATTEMPTS) {
     // Convert otpResult.updated_at to the server's timezone
     const updatedAtLocal = new Date(attempt.updated_at);
@@ -160,16 +160,16 @@ export const generateOTP = async (email) => {
       );
     }
     // reset the attempts to 0
-    await OTP.resetAttempts(email);
+    await new OTP().resetAttempts(email);
   }
 
   // store the otp in database
-  await OTP.createOTP({ email, otp });
+  await new OTP().createOTP({ email, otp });
   return { email, otp };
 };
 
 export const verifyOTP = async (email, otp) => {
-  const otpResult = await OTP.findOTPByEmail(email);
+  const otpResult = await new OTP().findOTPByEmail(email);
   if (!otpResult) {
     throw new Error('OTP: Email not found');
   }
@@ -202,7 +202,7 @@ export const verifyOTP = async (email, otp) => {
     return { success: true };
   }
   // increment the number of attempts
-  const { attempts } = await OTP.incrementAttempts(email);
+  const { attempts } = await new OTP().incrementAttempts(email);
 
   throw new ApiError(
     400,

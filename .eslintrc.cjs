@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'consistent-return': 'off',
+    'no-shadow': 'off',
     'import/extensions': ['error', 'ignorePackages'],
     'import/order': 'off',
     'import/prefer-default-export': 'off',

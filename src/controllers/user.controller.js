@@ -4,7 +4,11 @@ import Profile from '../models/profile.model.js';
 import OTP from '../models/otp.model.js';
 import { generateToken } from '../utils/jwt.util.js';
 import ApiError from '../utils/ApiError.util.js';
-import { createTimestampedAvatarUrl } from '../utils/media.util.js';
+import {
+  createTimestampedFileUrl,
+  deleteObject,
+  extractKeyFromUrl,
+} from '../utils/s3.util.js';
 
 export const validateSession = async (req, res) => {
   res.status(200).json({
@@ -17,7 +21,7 @@ export const validateSession = async (req, res) => {
 export const checkEmailNotExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const existingUser = await User.findByEmail(email);
+    const existingUser = await new User().findByEmail(email);
     if (existingUser) {
       throw new ApiError(400, 'User', 'User already exists');
     }
@@ -30,7 +34,7 @@ export const checkEmailNotExists = async (req, res, next) => {
 export const checkEmailExists = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const existingUser = await User.findByEmail(email);
+    const existingUser = await new User().findByEmail(email);
     if (!existingUser) {
       throw new ApiError(400, 'User', 'User does not exist');
     }
@@ -46,13 +50,13 @@ export const register = async (req, res, next) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
     }
-    const existingUser = await User.findByEmail(email);
+    const existingUser = await new User().findByEmail(email);
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
     // check if email is otp verified before signup
-    const otpRecord = await OTP.findOTPByEmail(email);
+    const otpRecord = await new OTP().findOTPByEmail(email);
     if (!otpRecord || !otpRecord.verified) {
       return res.status(400).json({ message: 'Email not verified' });
     }
@@ -69,7 +73,7 @@ export const register = async (req, res, next) => {
 
     // hash password and create user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ email, password: hashedPassword });
+    const user = await new User().create({ email, password: hashedPassword });
     delete user.password;
     res.status(201).json(user);
   } catch (error) {
@@ -83,14 +87,14 @@ export const updatePassword = async (req, res, next) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
     }
-    const existingUser = await User.findByEmail(email);
+    const existingUser = await new User().findByEmail(email);
     if (!existingUser) {
       return res.status(400).json({ message: 'User does not exist' });
     }
 
     // hash password and update user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.updatePassword(email, hashedPassword);
+    const user = await new User().updatePassword(email, hashedPassword);
     delete user.password;
     res.status(200).json(user);
   } catch (error) {
@@ -101,7 +105,7 @@ export const updatePassword = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const userProfileRecord = await User.findByEmailWithProfile(email);
+    const userProfileRecord = await new User().findByEmailWithProfile(email);
     if (!userProfileRecord) {
       throw new ApiError(
         401,
@@ -133,7 +137,7 @@ export const login = async (req, res, next) => {
 export const readUser = async (req, res, next) => {
   try {
     const { email } = req.tokenPayload;
-    const userProfileRecord = await User.findByEmailWithProfile(email);
+    const userProfileRecord = await new User().findByEmailWithProfile(email);
     if (!userProfileRecord) {
       throw new ApiError(404, 'User', 'User not found');
     }
@@ -154,7 +158,7 @@ export const logout = async (req, res) => {
 export const readProfile = async (req, res, next) => {
   try {
     const { email } = req.tokenPayload;
-    const profileRecord = await Profile.findByEmail(email);
+    const profileRecord = await new Profile().findByEmail(email);
     if (!profileRecord) {
       return res.status(404).json({ message: 'Profile not found' });
     }
@@ -170,7 +174,7 @@ export const getProfileCompletionStatus = async (req, res, next) => {
   try {
     const { email } = req.tokenPayload;
     const profileCompletionStatus =
-      await Profile.findProfileCompletionStatus(email);
+      await new Profile().findProfileCompletionStatus(email);
     res.status(200).json({
       profileCompletionStatus,
       message: 'Profile completion status',
@@ -187,10 +191,9 @@ export const updateProfile = async (req, res, next) => {
 
     const profileData = req.body;
 
-    // TODO: delete existing avatar file if new avatar is uploaded
-    const updatedProfile = await Profile.createOrUpdate(userId, {
+    const updatedProfile = await new Profile().createOrUpdate(userId, {
       ...profileData,
-      avatar: createTimestampedAvatarUrl(profileData.avatar),
+      avatar: createTimestampedFileUrl(profileData.avatar),
     });
     res
       .status(200)
@@ -202,13 +205,19 @@ export const updateProfile = async (req, res, next) => {
 
 export const updateAvatar = async (req, res, next) => {
   try {
-    const { id: userId } = req.tokenPayload;
+    const { id: userId, email } = req.tokenPayload;
     const { avatar } = req.body;
 
-    // TODO: delete existing avatar file if new avatar is uploaded
-    const result = await Profile.updateAvatar(
+    // delete existing avatar file if new avatar is uploaded
+    const { avatar: currentAvatar } = await new Profile().findByEmail(email);
+    if (currentAvatar && !avatar) {
+      const key = extractKeyFromUrl(currentAvatar);
+      await deleteObject(key);
+    }
+
+    const result = await new Profile().updateAvatar(
       userId,
-      createTimestampedAvatarUrl(avatar),
+      avatar ? createTimestampedFileUrl(avatar) : null,
     );
     res.status(200).json({ success: true, result, message: 'Avatar updated' });
   } catch (error) {

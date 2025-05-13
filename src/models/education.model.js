@@ -1,4 +1,4 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 import ApiError from '../utils/ApiError.util.js';
 import NITAP from '../utils/constants.util.js';
 import MembershipApplications from './membershipApplication.model.js';
@@ -15,8 +15,8 @@ const educationColumns = [
   'description',
 ];
 
-class Educations {
-  static async createOrUpdate(userId, educationData) {
+class Educations extends Model {
+  async createOrUpdate(userId, educationData) {
     const columns = educationColumns.filter(
       (column) => educationData[column] !== undefined && column !== 'user_id',
     );
@@ -60,35 +60,36 @@ class Educations {
     ${columns.map((column) => `${column} = EXCLUDED.${column}`).join(', ')}
     RETURNING *
     `;
-    const result = await db.query(sql, values);
+    const result = await this.queryExecutor.query(sql, values);
     return result.rows[0];
   }
 
-  static async findByUserId(userId) {
-    const result = await db.query(
+  async findByUserId(userId) {
+    const result = await this.queryExecutor.query(
       'SELECT * FROM educations WHERE user_id = $1',
       [userId],
     );
     return result.rows;
   }
 
-  static async findNITAPByUserId(userId) {
-    const result = await db.query(
+  async findNITAPByUserId(userId) {
+    const result = await this.queryExecutor.query(
       'SELECT * FROM educations WHERE user_id = $1 AND institute = $2',
       [userId, NITAP],
     );
     return result.rows;
   }
 
-  static async findById(id) {
-    const result = await db.query('SELECT * FROM educations WHERE id = $1', [
-      id,
-    ]);
+  async findById(id) {
+    const result = await this.queryExecutor.query(
+      'SELECT * FROM educations WHERE id = $1',
+      [id],
+    );
     return result.rows[0];
   }
 
-  static async delete(id) {
-    const result = await db.query(
+  async delete(id) {
+    const result = await this.queryExecutor.query(
       'DELETE FROM educations WHERE id = $1 RETURNING *',
       [id],
     );

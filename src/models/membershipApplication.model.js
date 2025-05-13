@@ -1,9 +1,9 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 import NITAP from '../utils/constants.util.js';
 
-class MembershipApplications {
-  static async verifyUserSign(userId, sign) {
-    const { rowCount } = await db.query(
+class MembershipApplications extends Model {
+  async verifyUserSign(userId, sign) {
+    const { rowCount } = await this.queryExecutor.query(
       'SELECT * FROM membership_applications WHERE user_id = $1 AND sign = $2',
       [userId, sign],
     );
@@ -13,7 +13,7 @@ class MembershipApplications {
   /**
    * Find a list of membership applications given filters.
    */
-  static async find(filters = {}) {
+  async find(filters = {}) {
     let sql = `
     SELECT membership_applications.*, users.email,
     profiles.roll_no, profiles.avatar, profiles.title, profiles.first_name, profiles.last_name,
@@ -32,12 +32,12 @@ class MembershipApplications {
 
     sql += ' ORDER BY membership_applications.created_at DESC';
 
-    const { rows } = await db.query(sql, values);
+    const { rows } = await this.queryExecutor.query(sql, values);
     return rows;
   }
 
-  static async findById(id) {
-    const { rows } = await db.query(
+  async findById(id) {
+    const { rows } = await this.queryExecutor.query(
       `
     SELECT membership_applications.*,
     profiles.*,
@@ -55,16 +55,16 @@ class MembershipApplications {
     return rows[0];
   }
 
-  static async create(userId, data) {
-    const { rows } = await db.query(
+  async create(userId, data) {
+    const { rows } = await this.queryExecutor.query(
       'INSERT INTO membership_applications (user_id, membership_level, sign) VALUES ($1, $2, $3) RETURNING *',
       [userId, data.membership_level, data.sign],
     );
     return rows[0];
   }
 
-  static async updateStatus(id, status) {
-    const { rows } = await db.query(
+  async updateStatus(id, status) {
+    const { rows } = await this.queryExecutor.query(
       'UPDATE membership_applications SET status = $1 WHERE id = $2 RETURNING *',
       [status, id],
     );

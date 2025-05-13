@@ -1,12 +1,18 @@
 import MembershipApplications from '../models/membershipApplication.model.js';
 import User from '../models/user.model.js';
+import * as db from '../config/db.config.js';
 import HeroSection from '../models/heroSection.model.js';
+import bcrypt from 'bcrypt';
+import ApiError from '../utils/ApiError.util.js';
+import Profile from '../models/profile.model.js';
+import { deleteObject, extractKeyFromUrl } from '../utils/s3.util.js';
 
 export const getMembershipApplications = async (req, res, next) => {
   try {
-    const membershipApplicationRecords = await MembershipApplications.find({
-      'membership_applications.status': 'pending',
-    });
+    const membershipApplicationRecords =
+      await new MembershipApplications().find({
+        'membership_applications.status': 'pending',
+      });
     res.json(membershipApplicationRecords);
   } catch (err) {
     next(err);
@@ -17,10 +23,31 @@ export const getMembershipApplicationById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const membershipApplicationRecord =
-      await MembershipApplications.findById(id);
+      await new MembershipApplications().findById(id);
     res.json(membershipApplicationRecord);
   } catch (err) {
     next(err);
+  }
+};
+
+const approveMembershipApplication = async (id) => {
+  const client = await db.getClient();
+  try {
+    client.query('BEGIN');
+    // approve application
+    const membershipApplicationRecord = await new MembershipApplications(
+      client,
+    ).updateStatus(id, 'approved');
+    // assign 'alumni' role
+    await new User(client).addRoles(membershipApplicationRecord.user_id, [
+      'alumni',
+    ]);
+    client.query('COMMIT');
+  } catch (e) {
+    client.query('ROLLBACK');
+    throw new ApiError(500, 'DB', 'Approving application failed!');
+  } finally {
+    client.release();
   }
 };
 
@@ -33,32 +60,28 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
 
     // if current status is !pending, return error
     const existingMembershipApplicationRecord =
-      await MembershipApplications.findById(id);
+      await new MembershipApplications().findById(id);
     if (existingMembershipApplicationRecord.status !== 'pending') {
       return res.status(400).json({
         message: 'Cannot update status of resolved/rejected application',
       });
     }
-
-    const membershipApplicationRecord =
-      await MembershipApplications.updateStatus(id, status);
-    if (membershipApplicationRecord.status === 'approved') {
-      // add 'alumni' role to user
-      const userRecord = await User.addRoles(
-        membershipApplicationRecord.user_id,
-        ['alumni'],
-      );
-      if (userRecord.role.includes('alumni')) {
-        res.status(201).json({
-          message: 'Membership application approved successfully',
-          membershipApplicationRecord,
-        });
-      }
-    } else {
+    if (status === 'rejected') {
+      const membershipApplicationRecord =
+        await new MembershipApplications().updateStatus(id, status);
       res.status(201).json({
         message: 'Membership application rejected successfully',
         membershipApplicationRecord,
       });
+    } else if (status === 'approved') {
+      const membershipApplicationRecord =
+        await approveMembershipApplication(id);
+      res.status(201).json({
+        message: 'Membership application approved successfully',
+        membershipApplicationRecord,
+      });
+    } else {
+      throw new ApiError(400, 'Usage', `Invalid status value: ${status}`);
     }
   } catch (err) {
     next(err);
@@ -68,21 +91,38 @@ export const updateMembershipApplicationStatus = async (req, res, next) => {
 // user management
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.findWithBasicProfile();
+    const users = await new User().findWithBasicProfile();
     res.status(200).json({ users });
   } catch (err) {
     next(err);
   }
 };
 
-export const changeUserPassword = async (req, res) => {
-  res.json({ message: 'TODO', payload: req.body });
+export const changeUserPassword = async (req, res, next) => {
+  const { userId, password, confirmPassword } = req.body;
+  try {
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await new User().updatePasswordById(userId, hashedPassword);
+    delete user.password;
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const deleteUserAccount = async (req, res, next) => {
   const { userId } = req.body;
   try {
-    const result = await User.delete(userId);
+    // get user avatar to delete from s3 once user is deleted
+    const { avatar } = await new Profile().findByUserId(userId);
+    const result = await new User().delete(userId);
+    if (avatar) {
+      const avatarKey = extractKeyFromUrl(avatar);
+      await deleteObject(avatarKey);
+    }
 
     res.json({ deleted: result, message: 'Account deleted' });
   } catch (error) {
@@ -93,7 +133,7 @@ export const deleteUserAccount = async (req, res, next) => {
 export const assignUserRoles = async (req, res, next) => {
   try {
     const { userId, roles } = req.body;
-    const result = await User.addRoles(userId, roles);
+    const result = await new User().addRoles(userId, roles);
     res.json({ message: 'Role(s) assgined successfully', updatedUser: result });
   } catch (error) {
     next(error);
@@ -103,7 +143,7 @@ export const assignUserRoles = async (req, res, next) => {
 export const revokeUserRoles = async (req, res, next) => {
   try {
     const { userId, roles } = req.body;
-    const result = await User.removeRoles(userId, roles);
+    const result = await new User().removeRoles(userId, roles);
     res.json({ message: 'Role(s) revoked successfully', updatedUser: result });
   } catch (error) {
     next(error);
@@ -114,7 +154,7 @@ export const revokeUserRoles = async (req, res, next) => {
 export const updateHeroContent = async (req, res, next) => {
   try {
     const formData = req.body;
-    const result = HeroSection.update(formData);
+    const result = HeroSection().update(formData);
     if (result) {
       res.status(200).json({ message: 'Hero section updated successfully' });
     } else {

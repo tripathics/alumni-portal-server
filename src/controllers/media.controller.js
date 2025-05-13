@@ -11,7 +11,7 @@ export const getSign = async (req, res, next) => {
   try {
     // if user is not admin, check if it's their own sign
     if (!userRole.includes('admin')) {
-      const isUserSign = await MembershipApplications.verifyUserSign(
+      const isUserSign = await new MembershipApplications().verifyUserSign(
         userId,
         filename,
       );

@@ -1,11 +1,11 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 import ApiError from '../utils/ApiError.util.js';
 
 const requiredCols = ['title', 'description'];
 
-class HeroSection {
-  static async find() {
-    const result = await db.query(`
+class HeroSection extends Model {
+  async find() {
+    const result = await this.queryExecutor.query(`
       SELECT * FROM hero_section
       WHERE id = 1
     `);
@@ -15,11 +15,11 @@ class HeroSection {
     return result.rows[0];
   }
 
-  static async update(data) {
+  async update(data) {
     if (requiredCols.some((col) => !data[col])) {
       throw new ApiError(400, 'DB', 'Missing required fields');
     }
-    const result = await db.query(
+    const result = await this.queryExecutor.query(
       `
       INSERT INTO hero_section (id, title, description, hero_image)
       VALUES (1, $1, $2, $3)

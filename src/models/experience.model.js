@@ -1,4 +1,4 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 
 const experienceColumns = [
   'id',
@@ -13,8 +13,8 @@ const experienceColumns = [
   'description',
 ];
 
-class Experiences {
-  static async createOrUpdate(userId, experienceData) {
+class Experiences extends Model {
+  async createOrUpdate(userId, experienceData) {
     const columns = experienceColumns.filter(
       (column) => !!experienceData[column] && column !== 'user_id',
     );
@@ -27,20 +27,20 @@ class Experiences {
     ${columns.map((column) => `${column} = EXCLUDED.${column}`).join(', ')}
     RETURNING *
     `;
-    const result = await db.query(sql, values);
+    const result = await this.queryExecutor.query(sql, values);
     return result.rows[0];
   }
 
-  static async findByUserId(userId) {
-    const result = await db.query(
+  async findByUserId(userId) {
+    const result = await this.queryExecutor.query(
       'SELECT * FROM experiences WHERE user_id = $1',
       [userId],
     );
     return result.rows;
   }
 
-  static async delete(id) {
-    const result = await db.query(
+  async delete(id) {
+    const result = await this.queryExecutor.query(
       'DELETE FROM experiences WHERE id = $1 RETURNING *',
       [id],
     );

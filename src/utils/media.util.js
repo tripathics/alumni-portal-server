@@ -16,7 +16,7 @@ const deleteFile = async (filename, type) => {
 };
 
 const createTimestampedFileUrl = (filename) =>
-  filename ? `${filename}?updated_at=${new Date().getTime()}}` : null;
+  filename ? `${filename}?updated_at=${new Date().getTime()}` : null;
 
 export const createTimestampedAvatarUrl = (filename) =>
   createTimestampedFileUrl(filename);

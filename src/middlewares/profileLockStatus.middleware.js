@@ -6,7 +6,7 @@ export const profileLockStatus = async (req, res, next) => {
     tokenPayload: { id: userId },
   } = req;
   try {
-    const profileLocked = await Profile.profileStatus(userId);
+    const profileLocked = await new Profile().profileStatus(userId);
     req.profile_locked = profileLocked;
     next();
   } catch (error) {

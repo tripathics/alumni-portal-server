@@ -11,7 +11,7 @@ export const prefillMembershipForm = async (req, res, next) => {
       .json({ message: 'Membership application is pending for approval' });
   }
   try {
-    const profile = await Profile.findProfileWithEducationAtNITAP(
+    const profile = await new Profile().findProfileWithEducationAtNITAP(
       req.tokenPayload.email,
     );
     if (!profile) {
@@ -29,7 +29,7 @@ export const prefillMembershipForm = async (req, res, next) => {
  */
 export const getAlumni = async (req, res, next) => {
   try {
-    const result = await Alumni.find();
+    const result = await new Alumni().find();
     res.json(result);
   } catch (error) {
     next(error);
@@ -44,7 +44,7 @@ export const submitMembershipForm = async (req, res, next) => {
   }
   membershipFormData.sign = createTimestampedSignUrl(membershipFormData.sign);
   try {
-    const application = await MembershipApplications.create(
+    const application = await new MembershipApplications().create(
       tokenPayload.id,
       membershipFormData,
     );
@@ -62,7 +62,7 @@ export const getPastApplications = async (req, res, next) => {
   const { id } = req.tokenPayload;
   const filters = { 'membership_applications.user_id': id };
   try {
-    const pastApplications = await MembershipApplications.find(filters);
+    const pastApplications = await new MembershipApplications().find(filters);
     res.status(200).json(pastApplications);
   } catch (error) {
     next(error);
@@ -75,7 +75,7 @@ export const getApplication = async (req, res, next) => {
     tokenPayload: { id: userId },
   } = req;
   try {
-    const application = await MembershipApplications.findById(id);
+    const application = await new MembershipApplications().findById(id);
     if (application.user_id !== userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }

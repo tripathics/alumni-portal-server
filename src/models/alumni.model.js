@@ -1,9 +1,9 @@
-import * as db from '../config/db.config.js';
+import Model from './model.js';
 import NITAP from '../utils/constants.util.js';
 
-class Alumni {
-  static async find() {
-    const result = await db.query(
+class Alumni extends Model {
+  async find() {
+    const result = await this.queryExecutor.query(
       `
       SELECT
         u.id,
