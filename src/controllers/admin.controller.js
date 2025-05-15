@@ -33,7 +33,7 @@ export const getMembershipApplicationById = async (req, res, next) => {
 const approveMembershipApplication = async (id) => {
   const client = await db.getClient();
   try {
-    client.query('BEGIN');
+    await client.query('BEGIN');
     // approve application
     const membershipApplicationRecord = await new MembershipApplications(
       client,
@@ -42,9 +42,9 @@ const approveMembershipApplication = async (id) => {
     await new User(client).addRoles(membershipApplicationRecord.user_id, [
       'alumni',
     ]);
-    client.query('COMMIT');
+    await client.query('COMMIT');
   } catch (e) {
-    client.query('ROLLBACK');
+    await client.query('ROLLBACK');
     throw new ApiError(500, 'DB', 'Approving application failed!');
   } finally {
     client.release();
@@ -118,13 +118,23 @@ export const deleteUserAccount = async (req, res, next) => {
   try {
     // get user avatar to delete from s3 once user is deleted
     const { avatar } = await new Profile().findByUserId(userId);
-    const result = await new User().delete(userId);
+    const userApplications = await new MembershipApplications().find({
+      'users.id': userId,
+    });
+
+    const deleteResult = await new User().delete(userId);
+
+    // delete media associated with user
     if (avatar) {
       const avatarKey = extractKeyFromUrl(avatar);
       await deleteObject(avatarKey);
     }
+    userApplications.forEach(async ({ sign }) => {
+      const signKey = extractKeyFromUrl(sign);
+      await deleteObject(signKey);
+    });
 
-    res.json({ deleted: result, message: 'Account deleted' });
+    res.json({ deleted: deleteResult, message: 'Account deleted' });
   } catch (error) {
     next(error);
   }

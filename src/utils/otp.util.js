@@ -1,3 +1,4 @@
+import * as db from '../config/db.config.js';
 import OTP from '../models/otp.model.js';
 import transporter from '../config/nodemailer.config.js';
 import logger from '../config/logger.config.js';
@@ -139,36 +140,108 @@ NIT Arunachal Pradesh
 };
 
 export const generateOTP = async (email) => {
-  const otp = Math.floor(Math.random() * 10e5)
-    .toString()
-    .padEnd(6, '0');
+  const client = await db.getClient();
+  try {
+    const otp = Math.floor(Math.random() * 10e5)
+      .toString()
+      .padEnd(6, '0');
 
-  // check if attempts less than 3 and last attempt is more than 24 hours ago
-  const attempt = await new OTP().findAttemptByEmail(email);
-  if (attempt && attempt.attempts > MAX_ATTEMPTS) {
-    // Convert otpResult.updated_at to the server's timezone
-    const updatedAtLocal = new Date(attempt.updated_at);
-    updatedAtLocal.setMinutes(
-      updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
-    );
-    // if last attempt is less than 24 hours ago
-    if (new Date() - updatedAtLocal < 24 * 60 * 60 * 1000) {
+    await client.query('BEGIN');
+    // check if attempts less than 3 and last attempt is more than 24 hours ago
+    const attempt = await new OTP(client).findAttemptByEmail(email);
+    if (attempt && attempt.attempts > MAX_ATTEMPTS) {
+      // Convert otpResult.updated_at to the server's timezone
+      const updatedAtLocal = new Date(attempt.updated_at);
+      updatedAtLocal.setMinutes(
+        updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
+      );
+      // if last attempt is less than 24 hours ago
+      if (new Date() - updatedAtLocal < 24 * 60 * 60 * 1000) {
+        throw new ApiError(
+          400,
+          'OTP',
+          'Max limit reached for today. Please try again after 24 hrs.',
+        );
+      }
+      // reset the attempts to 0
+      await new OTP(client).resetAttempts(email);
+    }
+
+    // store the otp in database
+    await new OTP(client).createOTP({ email, otp });
+    await client.query('COMMIT');
+
+    return { email, otp };
+  } catch (e) {
+    if (e instanceof ApiError && e.code === 'OTP') {
+      throw e;
+    } else {
+      await client.query('ROLLBACK');
+      throw new ApiError(500, 'DB', 'Error generating OTP');
+    }
+  } finally {
+    client.release();
+  }
+};
+
+export const verifyOTP = async (email, otp) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const otpResult = await new OTP(client).findOTPByEmail(email);
+    if (!otpResult) throw new ApiError(400, 'OTP', 'OTP: Email not found');
+
+    // check attempts left
+    if (otpResult.attempts > MAX_ATTEMPTS) {
       throw new ApiError(
         400,
         'OTP',
         'Max limit reached for today. Please try again after 24 hrs.',
       );
     }
-    // reset the attempts to 0
-    await new OTP().resetAttempts(email);
-  }
 
-  // store the otp in database
-  await new OTP().createOTP({ email, otp });
-  return { email, otp };
+    // otp matched
+    if (otpResult.otp === otp) {
+      const updatedAtLocal = new Date(otpResult.updated_at);
+      updatedAtLocal.setMinutes(
+        updatedAtLocal.getMinutes() - new Date().getTimezoneOffset(),
+      );
+
+      // otp expired
+      if (new Date() - updatedAtLocal > 5 * 60 * 1000)
+        throw new ApiError(400, 'OTP', 'OTP Expired');
+
+      // OTP is correct so mark the OTP verified and reset attempts to 0
+      await new OTP(client).markVerified(email);
+      await new OTP(client).resetAttempts(email);
+
+      await client.query('COMMIT');
+      return { success: true };
+    }
+
+    // otp not matched, increment attempts
+    const { attempts } = await new OTP(client).incrementAttempts(email);
+    await client.query('COMMIT');
+    throw new ApiError(
+      400,
+      'OTP',
+      `Incorrect OTP. Attempts left: ${MAX_ATTEMPTS - attempts + 1}`,
+    );
+  } catch (e) {
+    if (e instanceof ApiError && e.code === 'OTP') {
+      throw e;
+    } else {
+      await client.query('ROLLBACK');
+      throw new ApiError('DB', 500, 'Error verifying OTP');
+    }
+  } finally {
+    client.release();
+  }
 };
 
-export const verifyOTP = async (email, otp) => {
+export const verifyOTPOld = async (email, otp) => {
   const otpResult = await new OTP().findOTPByEmail(email);
   if (!otpResult) {
     throw new Error('OTP: Email not found');
