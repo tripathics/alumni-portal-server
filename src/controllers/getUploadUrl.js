@@ -26,7 +26,7 @@ export const getUploadUrl = async (req, res, next) => {
       throw new ApiError(
         400,
         'Media',
-        `File size should be less than ${uploadCategories.avatar.maxSize / 1000000}MB`,
+        `File size should be less than ${uploadCategories.avatar.maxSize / (1024 * 1024)}MB`,
       );
     }
 
@@ -36,12 +36,9 @@ export const getUploadUrl = async (req, res, next) => {
 
     const extension = filetype.split('/')[1];
     let name = filename;
-    if (type === 'avatar') {
-      if (filesize > 2097152) {
-        throw new ApiError(400, 'Media', 'File size should be less than 2MB');
-      }
-      name = `${req.tokenPayload.id}.${extension}`;
-    }
+    if (type === 'avatar') name = `${req.tokenPayload.id}.${extension}`;
+    else if (type === 'director') name = `director.${extension}`;
+    else if (type === 'president') name = `president.${extension}`;
 
     if (!filename || !filetype) {
       throw new ApiError(400, 'Media', 'filename and filetype are required');

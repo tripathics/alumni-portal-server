@@ -18,6 +18,14 @@ export const uploadCategories = {
     allowedTypes: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
     maxSize: 3145728, // 3MB
   },
+  director: {
+    allowedTypes: ['image/png', 'image/jpeg'],
+    maxSize: 2097152, // 2MB
+  },
+  president: {
+    allowedTypes: ['image/png', 'image/jpeg'],
+    maxSize: 2097152, // 2MB
+  },
 };
 
 /**

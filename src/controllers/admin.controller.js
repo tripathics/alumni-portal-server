@@ -1,11 +1,16 @@
 import MembershipApplications from '../models/membershipApplication.model.js';
+import WebMessages from '../models/webMessages.model.js';
 import User from '../models/user.model.js';
 import * as db from '../config/db.config.js';
 import HeroSection from '../models/heroSection.model.js';
 import bcrypt from 'bcrypt';
 import ApiError from '../utils/ApiError.util.js';
 import Profile from '../models/profile.model.js';
-import { deleteObject, extractKeyFromUrl } from '../utils/s3.util.js';
+import {
+  createTimestampedFileUrl,
+  deleteObject,
+  extractKeyFromUrl,
+} from '../utils/s3.util.js';
 
 export const getMembershipApplications = async (req, res, next) => {
   try {
@@ -164,7 +169,7 @@ export const revokeUserRoles = async (req, res, next) => {
 export const updateHeroContent = async (req, res, next) => {
   try {
     const formData = req.body;
-    const result = HeroSection().update(formData);
+    const result = await new HeroSection().update(formData);
     if (result) {
       res.status(200).json({ message: 'Hero section updated successfully' });
     } else {
@@ -172,5 +177,30 @@ export const updateHeroContent = async (req, res, next) => {
     }
   } catch (err) {
     next(err);
+  }
+};
+
+export const updateMessages = async (req, res, next) => {
+  try {
+    // check if usage is invalid
+    const d = req.body;
+    if (
+      !(d.message_from && d.full_name && d.email && d.phone && d.message) ||
+      (d.message_from === 'president' && !(d.designation && d.department))
+    ) {
+      throw new ApiError(400, 'Usage', 'Invalid usage');
+    }
+
+    const { avatar, ...restData } = req.body;
+    const data = {
+      ...restData,
+      avatar: avatar ? createTimestampedFileUrl(avatar) : undefined,
+    };
+
+    const messageRecord = await new WebMessages().createOrUpdate(data);
+
+    res.json({ success: true, updatedMessage: messageRecord });
+  } catch (e) {
+    next(e);
   }
 };

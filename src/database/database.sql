@@ -97,28 +97,15 @@ CREATE TABLE hero_section (
 );
 ALTER TABLE hero_section ADD CONSTRAINT single_row CHECK (id = 1);
 
-CREATE TABLE IF NOT EXISTS web_director_message (
-    director_name varchar(100) NOT NULL,
-    director_message text NOT NULL,
-    director_email varchar(50) DEFAULT NULL,
-    director_phone varchar(100) DEFAULT NULL,
-    director_avatar varchar(255) DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS web_president_message (  
-    president_name varchar(100) NOT NULL,
-    president_email varchar(50) DEFAULT NULL,
-    president_phone varchar(100) DEFAULT NULL,
-    president_designation varchar(100) DEFAULT NULL,
-    president_message text NOT NULL,
-    president_avatar varchar(255) DEFAULT NULL
-);
-
-CREATE TABLE IF NOT EXISTS contributors (
-    user_id uuid REFERENCES users(id) ON DELETE CASCADE PRIMARY KEY,
-    contribution varchar(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS web_messages (
+  message_from text PRIMARY KEY NOT NULL CHECK(message_from = ANY(ARRAY['director', 'president'])),
+  full_name varchar(100) NOT NULL,
+  email varchar(50) NOT NULL,
+  phone varchar(100) NOT NULL,
+  message text NOT NULL,
+  designation varchar(100),
+  department varchar(100),
+  avatar varchar(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS events (

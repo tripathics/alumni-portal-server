@@ -14,7 +14,7 @@ import mediaRoute from './media.route.js';
 import alumniRoute from './alumni.route.js';
 import adminRoute from './admin.route.js';
 import publicAlumniRoute from './public-alumni.route.js';
-import { getUploadUrl } from '../controllers/getUploadUrl.js';
+import getUploadUrlRoute from './get-upload-url.route.js';
 
 const router = Router();
 
@@ -22,7 +22,7 @@ router.use('/media', mediaRoute);
 router.use('/api/nitapalumnicontent', websiteContentRoute);
 router.use('/api/users', userRoute);
 router.use('/api/otp', otpRoute);
-router.get('/api/get-upload-url/:type', authenticate, getUploadUrl);
+router.use('/api/get-upload-url', authenticate, getUploadUrlRoute);
 router.use('/api/alumni', authenticate, alumniRoute);
 router.use('/api/public/alumni', publicAlumniRoute);
 router.use('/api/admin', authenticateAdmin, adminRoute);

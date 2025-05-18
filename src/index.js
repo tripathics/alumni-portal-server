@@ -2,7 +2,7 @@ import './config/dotenv.config.js';
 import app from './config/express.config.js';
 import logger from './config/logger.config.js';
 import { verifyDbConnection } from './config/db.config.js';
-import * as db from './config/nodemailer.config.js';
+import * as mailer from './config/nodemailer.config.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -11,7 +11,7 @@ app.listen(PORT, async () => {
     await verifyDbConnection();
     logger.info('Connected to the database');
 
-    await db.verifyTransporterConnection();
+    await mailer.verifyTransporterConnection();
     logger.info('SMTP connection verified! Ready for emails');
 
     logger.info(

@@ -9,11 +9,15 @@ import {
   revokeUserRoles,
   updateHeroContent,
   updateMembershipApplicationStatus,
+  updateMessages,
 } from '../controllers/admin.controller.js';
 
 const router = Router();
 
 router.patch('/content/hero', updateHeroContent);
+// TODO: director message and president messages (with designation)
+router.patch('/content/messages', updateMessages);
+// TODO: Alumni office details (address, phone, email)
 
 router.get('/membership-applications', getMembershipApplications);
 router.get('/membership-applications/:id', getMembershipApplicationById);
