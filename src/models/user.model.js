@@ -96,22 +96,21 @@ class User extends Model {
       'SELECT * FROM users WHERE id = $1',
       [id],
     );
-
     const currentRoles = userRecords[0].role;
     const newRoles = roles.filter((role) => !currentRoles.includes(role));
 
-    if (newRoles.length === 0) return userRecords[0];
+    if (newRoles.length === 0) return false;
 
     const placeholders = newRoles.map((_, i) => `$${i + 1}`).join(', ');
     const queryString = `
       UPDATE users SET role = array_cat(role, ARRAY[${placeholders}]) 
       WHERE id = $${newRoles.length + 1} RETURNING *
     `;
-    const { rows: updatedUserRecords } = await this.queryExecutor.query(
-      queryString,
-      [...newRoles, id],
-    );
-    return updatedUserRecords[0];
+    const { rowCount } = await this.queryExecutor.query(queryString, [
+      ...newRoles,
+      id,
+    ]);
+    return rowCount > 0;
   }
 
   async removeRoles(id, roles) {
@@ -126,6 +125,7 @@ class User extends Model {
         );
       });
       await client.query('COMMIT');
+      return true;
     } catch (e) {
       await client.query('ROLLBACK');
       throw new ApiError(500, 'DB', 'Error reovking roles');
