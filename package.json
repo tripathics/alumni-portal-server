@@ -10,7 +10,7 @@
     "lint:fix": "eslint . --fix",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "prepare": "husky",
+    "prepare": "node scripts/prepare.cjs",
     "migrate": "node ./src/database/migrate.js",
     "migrate:down": "node ./src/database/migrate.js down"
   },
@@ -42,8 +42,8 @@
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-prettier": "^5.2.6",
-    "husky": "^9.0.11",
     "nodemon": "^3.1.0",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "husky": "^9.0.11"
   }
 }

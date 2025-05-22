@@ -1,6 +1,6 @@
 import { MulterError } from 'multer';
 import logger from '../config/logger.config.js';
-import { MAX_AVATAR_SIZE, MAX_SIGN_SIZE } from '../config/storage.config.js';
+import { MAX_AVATAR_SIZE, MAX_SIGN_SIZE } from '../utils/s3.util.js';
 
 export const notFoundErrorHandler = (req, res) => {
   res.status(404).json({

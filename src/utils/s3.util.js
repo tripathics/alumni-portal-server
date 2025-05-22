@@ -4,12 +4,15 @@ import { s3Client, bucketName } from '../config/s3.config.js';
 import ApiError from './ApiError.util.js';
 import logger from '../config/logger.config.js';
 
+export const MAX_AVATAR_SIZE = 1024 * 1024 * 2; // 2MB
+export const MAX_SIGN_SIZE = 1024 * 200; // 200kB
+
 export const uploadCategories = {
   avatar: {
     allowedTypes: ['image/jpeg'],
-    maxSize: 2097152, // 2MB
+    maxSize: MAX_AVATAR_SIZE,
   },
-  sign: { allowedTypes: ['image/jpeg'], maxSize: Infinity },
+  sign: { allowedTypes: ['image/jpeg'], maxSize: MAX_SIGN_SIZE },
   post: {
     allowedTypes: ['image/webp', 'image/jpeg', 'image/jpg', 'image/png'],
     maxSize: Infinity,
